@@ -10,3 +10,6 @@ src_managed/
 project/boot/
 .history
 .cache
+
+#sublime project file
+jbd.sublime-project
