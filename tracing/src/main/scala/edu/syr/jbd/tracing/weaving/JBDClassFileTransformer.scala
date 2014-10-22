@@ -1,4 +1,4 @@
-package edu.syr.jbd.weaving
+package edu.syr.jbd.tracing.weaving
 
 import java.lang.instrument.ClassFileTransformer
 import java.security.ProtectionDomain
@@ -6,6 +6,7 @@ import java.security.ProtectionDomain
 import org.objectweb.asm._
 import org.objectweb.asm.util.CheckClassAdapter
 
+import edu.syr.jbd.tracing.JBDTrace
 
 class JBDClassFileTransformer extends ClassFileTransformer{
 
@@ -14,9 +15,13 @@ class JBDClassFileTransformer extends ClassFileTransformer{
     protectionDomain: ProtectionDomain,
     classFileBuffer: Array[Byte]):Array[Byte] = {
 
-    if(className != "HelloWorld")
+    JBDTrace.trace(loader)
+    //if(className != "HelloWorld")
+    if(loader == null || className.startsWith("edu/syr/jbd") 
+      || className.startsWith("com/sun/")
+      || className.startsWith("sun/"))  //to avoid system classes and jbd classes  
       return classFileBuffer
-    
+    println("ClassLoader:" + loader)
     val normalizedClassName = className.replaceAll("/", "\\.");
     println(normalizedClassName)
 

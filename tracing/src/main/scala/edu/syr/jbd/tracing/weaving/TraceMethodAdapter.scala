@@ -1,4 +1,4 @@
-package edu.syr.jbd.weaving
+package edu.syr.jbd.tracing.weaving
 
 import org.objectweb.asm._
 import org.objectweb.asm.commons.AdviceAdapter

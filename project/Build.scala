@@ -5,9 +5,9 @@ object JBDBuild extends Build {
   
   lazy val root = project.in(file(".")).aggregate(agent, examples)
 
-  lazy val agent = project.dependsOn(weaving, tracing)
+  lazy val agent = project.dependsOn(tracing)
   
-  lazy val weaving = project.dependsOn(tracing)
+//  lazy val weaving = project.dependsOn(tracing)
 
   lazy val tracing = project
 
