@@ -1,3 +1,11 @@
+/* 
+* @Author: troya
+* @Date:   2014-11-06 15:01:02
+* @Last Modified by:   troya
+* @Last Modified time: 2014-11-06 15:12:21
+*/
+
+
 package edu.syr.jbd.tracing
 
 import reactivemongo.bson._
@@ -25,7 +33,7 @@ object ConfigDoc{
   import scala.concurrent.ExecutionContext.Implicits.global
   def load_default = MongoDB.coll("config")
   .find(BSONDocument("symbol" -> "default"))
-  .one[ConfigDoc](ConfigDocReader,scala.concurrent.ExecutionContext.Implicits.global).map{ //IMPROVE ME!!!
+  .one[ConfigDoc](ConfigDocReader,scala.concurrent.ExecutionContext.Implicits.global).map{ //IMPROVE ME!!!  
     case Some(item) => item
     case _ => ConfigDoc("default", Nil, Nil)
   }

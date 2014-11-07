@@ -4,7 +4,9 @@ import java.lang.instrument.ClassFileTransformer
 import java.security.ProtectionDomain
 
 import org.objectweb.asm._
-import org.objectweb.asm.util.CheckClassAdapter
+import org.objectweb.asm.util._
+
+import java.io.PrintWriter;
 
 import edu.syr.jbd.tracing.JBDTrace
 
@@ -26,10 +28,21 @@ class JBDClassFileTransformer extends ClassFileTransformer{
     println(normalizedClassName)
 
     val classReader = new ClassReader(classFileBuffer)
-    val classWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES)
+    val classWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS)
     val classVisitor = new TraceClassAdapter(classWriter)
-    classReader.accept(new CheckClassAdapter(classVisitor), ClassReader.EXPAND_FRAMES)
-    return classWriter.toByteArray
+    classReader.accept(classVisitor, ClassReader.SKIP_FRAMES)
+
+    val result = classWriter.toByteArray
+    
+    if(true){
+      val cr = new ClassReader(result);
+      val printWriter = new PrintWriter(System.out);
+      val traceClassVisitor = new TraceClassVisitor(printWriter);
+      
+      cr.accept(traceClassVisitor, ClassReader.SKIP_DEBUG);
+    }
+    
+    return result
   }
 }
 
