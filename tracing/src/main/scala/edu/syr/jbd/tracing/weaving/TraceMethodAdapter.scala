@@ -2,18 +2,41 @@
 * @Author: troya
 * @Date:   2014-11-06 17:19:37
 * @Last Modified by:   Beinan
-* @Last Modified time: 2014-11-06 22:20:31
+* @Last Modified time: 2014-11-08 17:16:23
 */
 package edu.syr.jbd.tracing.weaving
 
 import org.objectweb.asm._
 import org.objectweb.asm.commons.AdviceAdapter
 
+/**
+ * Tacking method invocation
+ * @type {[type]}
+ */
+class MethodInvocationTrackerClassAdapter(cv: ClassVisitor) extends ClassVisitor(Opcodes.ASM4, cv) with Opcodes {
+  
+  private var owner: String = null
+  private var locks: List[String] = Nil
+
+  override def visit(version: Int, access: Int, name: String, signature: String, superName: String, interfaces: Array[String]) {
+    owner = name
+    println("class-visited:" + name)
+    super.visit(version, access, name, signature, superName, interfaces)
+  }
+
+  override def visitMethod(access: Int, name: String, desc: String, signature: String, exceptions: Array[String]): MethodVisitor = {
+    println("method-visited:" + name)
+    val mv: MethodVisitor = cv.visitMethod(access, name, desc, signature, exceptions)
+    return if (mv == null) null else new TraceMethodAdapter(api, mv, owner, access, name, desc)
+  }
+}
+
+
 class TraceMethodAdapter(api : Int, mv : MethodVisitor, owner: String,
   access : Int, name : String, desc : String) 
-extends AdviceAdapter(api, mv, access, name, desc) with Opcodes {
+    extends AdviceAdapter(api, mv, access, name, desc) with Opcodes {
 
-  lazy val is_static = (access | Opcodes.ACC_STATIC) != 0
+  lazy val is_static = (access & Opcodes.ACC_STATIC) != 0
   
   val method_key = owner + "#" + name + desc
   /**
@@ -28,9 +51,10 @@ extends AdviceAdapter(api, mv, access, name, desc) with Opcodes {
     //traceMethodEnter will return an invocation id
     mv.visitMethodInsn(Opcodes.INVOKESTATIC, "edu/syr/jbd/tracing/JBDTrace", 
       "traceMethodEnter", "(Ljava/lang/String;)J")
-
+    
     types.foldLeft[Int](off){ //trace each argument of the current method invocation
-      (pos:Int, a_type:Type) => 
+      (pos:Int, a_type:Type) =>
+        println(pos) 
         dup2() //for invocation id
         push(method_key)
         push(pos) //for argument seq
@@ -74,7 +98,11 @@ extends AdviceAdapter(api, mv, access, name, desc) with Opcodes {
      
       mv.visitMethodInsn(Opcodes.INVOKESTATIC, "edu/syr/jbd/tracing/JBDTrace", 
         "traceReturnValue", "(Ljava/lang/Object;Ljava/lang/String;)V")
-      }
     }
+  }
+  
+
+  
+  
 }
 

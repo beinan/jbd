@@ -2,7 +2,7 @@
 * @Author: Beinan
 * @Date:   2014-11-06 21:25:10
 * @Last Modified by:   Beinan
-* @Last Modified time: 2014-11-06 22:22:57
+* @Last Modified time: 2014-11-08 18:04:42
 */
 package edu.syr.jbd.tracing
 
@@ -62,6 +62,33 @@ object JBDTrace{
     MongoDB.coll("trace").insert(doc)   
 
   }
+
+  def traceFieldGetter(counter:JBDLocalValue, value: AnyRef, field:String){
+    val doc = BSONDocument(
+      "jvm_name" -> jvm_name,
+      "thread_id" -> Thread.currentThread().getId(),
+      "value" -> String.valueOf(value),
+      "version" -> counter.get,
+      "field" -> field,
+      "msg_type" -> "field_getter",      
+      "created_datetime" -> BSONDateTime(System.currentTimeMillis))
+    
+    MongoDB.coll("trace").insert(doc)   
+  }
+
+  def traceFieldSetter(counter:JBDLocalValue, value: AnyRef, field:String){
+    val doc = BSONDocument(
+      "jvm_name" -> jvm_name,
+      "thread_id" -> Thread.currentThread().getId(),
+      "value" -> String.valueOf(value),
+      "version" -> counter.count,
+      "field" -> field,
+      "msg_type" -> "field_setter",      
+      "created_datetime" -> BSONDateTime(System.currentTimeMillis))
+    
+    MongoDB.coll("trace").insert(doc)   
+  }
+
   def trace(v: AnyRef):Unit = {
     //println("aaaabbbb" + v)
   }
@@ -77,4 +104,10 @@ class JBDLocalValue{
     counter = counter + 1
     counter
   }
+  def get = counter
 }
+
+object JBDLocalValue{
+  def instance = new JBDLocalValue
+}
+

@@ -29,8 +29,9 @@ class JBDClassFileTransformer extends ClassFileTransformer{
 
     val classReader = new ClassReader(classFileBuffer)
     val classWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS)
-    val classVisitor = new TraceClassAdapter(classWriter)
-    classReader.accept(classVisitor, ClassReader.SKIP_FRAMES)
+    val method_tracker = new MethodInvocationTrackerClassAdapter(classWriter)
+    val field_tracker = new SynchronizedFieldTrackerClassAdapter(method_tracker)
+    classReader.accept(field_tracker, ClassReader.SKIP_FRAMES)
 
     val result = classWriter.toByteArray
     
@@ -45,20 +46,4 @@ class JBDClassFileTransformer extends ClassFileTransformer{
     return result
   }
 }
-
-class TraceClassAdapter(cv: ClassVisitor) extends ClassVisitor(Opcodes.ASM4, cv) with Opcodes {
-  override def visit(version: Int, access: Int, name: String, signature: String, superName: String, interfaces: Array[String]) {
-    owner = name
-    println("class-visited:" + name)
-    super.visit(version, access, name, signature, superName, interfaces)
-  }
-  override def visitMethod(access: Int, name: String, desc: String, signature: String, exceptions: Array[String]): MethodVisitor = {
-    println("method-visited:" + name)
-    val mv: MethodVisitor = cv.visitMethod(access, name, desc, signature, exceptions)
-    return if (mv == null) null else new TraceMethodAdapter(api, mv, owner, access, name, desc)
-    return mv
-  }
-  private var owner: String = null
-}
-
 
