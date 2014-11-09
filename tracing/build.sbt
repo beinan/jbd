@@ -17,5 +17,5 @@ libraryDependencies += "org.ow2.asm" % "asm-util" % "5.0.3"
 libraryDependencies += "org.ow2.asm" % "asm-commons" % "5.0.3"
 
 libraryDependencies += "com.typesafe" % "config" % "1.2.1"
-
+	
 libraryDependencies += "org.specs2" %% "specs2" % "2.4.9" % "test"

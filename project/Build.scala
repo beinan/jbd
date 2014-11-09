@@ -7,8 +7,6 @@ object JBDBuild extends Build {
 
   lazy val agent = project.dependsOn(tracing)
   
-//  lazy val weaving = project.dependsOn(tracing)
-
   lazy val tracing = project
 
   lazy val examples = project

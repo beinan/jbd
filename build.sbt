@@ -4,3 +4,13 @@ version := "1.0"
 
 packAutoSettings
 
+lazy val root = project.in(file(".")).aggregate(agent, examples)
+
+lazy val agent = project.dependsOn(tracing)
+  
+lazy val tracing = project
+
+lazy val examples = project
+
+lazy val virtualization = project.dependsOn(tracing).enablePlugins(PlayScala)
+

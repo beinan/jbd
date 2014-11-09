@@ -11,5 +11,10 @@ project/boot/
 .history
 .cache
 
+logs/
+dist/
+tmp/
+
 #sublime project file
 jbd.sublime*
+tracing/jbd-tracing.sublime-project
