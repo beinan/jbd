@@ -2,7 +2,7 @@
 * @Author: Beinan
 * @Date:   2014-11-08 16:07:14
 * @Last Modified by:   Beinan
-* @Last Modified time: 2014-11-08 18:17:07
+* @Last Modified time: 2014-11-14 20:23:33
 */
 
 package edu.syr.jbd.tracing.weaving
@@ -128,6 +128,7 @@ class SynchronizedFieldTrackerClassAdapter(cv: ClassVisitor) extends ClassVisito
 
     def generate(){
       val f_type = Type.getType(desc)
+      mv.visitCode()
       //get lock
       mv.visitVarInsn(Opcodes.ALOAD, 0)    //load "this" for getfield if "lock"
       mv.visitFieldInsn(Opcodes.GETFIELD, owner, lock_field_name(name), lock_desc)
@@ -160,6 +161,7 @@ class SynchronizedFieldTrackerClassAdapter(cv: ClassVisitor) extends ClassVisito
       //return
       mv.visitInsn(f_type.getOpcode(Opcodes.IRETURN))
       mv.visitMaxs(0, 0)
+      mv.visitEnd()
     }
 
   }
@@ -170,6 +172,7 @@ class SynchronizedFieldTrackerClassAdapter(cv: ClassVisitor) extends ClassVisito
 
     def generate(){
       val f_type = Type.getType(desc)
+      mv.visitCode()
       //get lock
       mv.visitVarInsn(Opcodes.ALOAD, 0)    //load "this" for getfield if "lock"
       mv.visitFieldInsn(Opcodes.GETFIELD, owner, lock_field_name(name), lock_desc)
@@ -198,8 +201,9 @@ class SynchronizedFieldTrackerClassAdapter(cv: ClassVisitor) extends ClassVisito
       mv.visitInsn(Opcodes.MONITOREXIT)
     
       //return
-      mv.visitInsn(Opcodes.RETURN)
+      mv.visitInsn(Opcodes.RETURN)      
       mv.visitMaxs(0, 0)
+      mv.visitEnd()
     }
 
   } 

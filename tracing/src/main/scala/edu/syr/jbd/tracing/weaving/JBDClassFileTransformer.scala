@@ -29,9 +29,9 @@ class JBDClassFileTransformer extends ClassFileTransformer{
 
     val classReader = new ClassReader(classFileBuffer)
     val classWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS)
-    val method_tracker = new MethodInvocationTrackerClassAdapter(classWriter)
-    val field_tracker = new SynchronizedFieldTrackerClassAdapter(method_tracker)
-    classReader.accept(field_tracker, ClassReader.SKIP_FRAMES)
+    val field_tracker = new SynchronizedFieldTrackerClassAdapter(classWriter)
+    val method_tracker = new MethodInvocationTrackerClassAdapter(field_tracker)
+    classReader.accept(method_tracker, ClassReader.SKIP_FRAMES)
 
     val result = classWriter.toByteArray
     

@@ -2,7 +2,7 @@
 * @Author: Beinan
 * @Date:   2014-11-06 21:25:10
 * @Last Modified by:   Beinan
-* @Last Modified time: 2014-11-08 18:04:42
+* @Last Modified time: 2014-11-14 21:48:42
 */
 package edu.syr.jbd.tracing
 
@@ -48,12 +48,28 @@ object JBDTrace{
 
 
   }
-  def traceReturnValue(return_val: AnyRef, method_desc: String){
+
+  def traceMethodInvocation(method_desc: String, parent_invocation_id:Long){
     val invocation_id = local.get.count    
     val doc = BSONDocument(
       "jvm_name" -> jvm_name,
       "thread_id" -> Thread.currentThread().getId(),
       "invocation_id" -> invocation_id,
+      "parent_invocation_id" -> parent_invocation_id,
+      "method_desc" -> method_desc,
+      "msg_type" -> "method_invoke",
+      "created_datetime" -> BSONDateTime(System.currentTimeMillis))
+    
+    MongoDB.coll("trace").insert(doc)   
+  }
+
+  def traceReturnValue(return_val: AnyRef, method_desc: String, parent_invocation_id:Long){
+    val invocation_id = local.get.count    
+    val doc = BSONDocument(
+      "jvm_name" -> jvm_name,
+      "thread_id" -> Thread.currentThread().getId(),
+      "invocation_id" -> invocation_id,
+      "parent_invocation_id" -> parent_invocation_id,
       "value" -> String.valueOf(return_val),
       "method_desc" -> method_desc,
       "msg_type" -> "method_return",
@@ -64,10 +80,12 @@ object JBDTrace{
   }
 
   def traceFieldGetter(counter:JBDLocalValue, value: AnyRef, field:String){
+    val invocation_id = local.get.count
     val doc = BSONDocument(
       "jvm_name" -> jvm_name,
       "thread_id" -> Thread.currentThread().getId(),
       "value" -> String.valueOf(value),
+      "invocation_id" -> invocation_id,
       "version" -> counter.get,
       "field" -> field,
       "msg_type" -> "field_getter",      
@@ -77,10 +95,12 @@ object JBDTrace{
   }
 
   def traceFieldSetter(counter:JBDLocalValue, value: AnyRef, field:String){
+    val invocation_id = local.get.count
     val doc = BSONDocument(
       "jvm_name" -> jvm_name,
       "thread_id" -> Thread.currentThread().getId(),
       "value" -> String.valueOf(value),
+      "invocation_id" -> invocation_id,
       "version" -> counter.count,
       "field" -> field,
       "msg_type" -> "field_setter",      

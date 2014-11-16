@@ -4,6 +4,7 @@
 
 GET     /                           controllers.MainController.index()
 GET     /message/:id                controllers.MainController.getMessage(id:String)
+POST    /mapreduce/:coll            controllers.MainController.mapReduce(coll:String)
 
 GET     /assets/javascripts/routes  controllers.MainController.javascriptRoutes()
 
