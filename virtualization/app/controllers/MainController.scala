@@ -2,7 +2,7 @@
 * @Author: Beinan
 * @Date:   2014-11-08 21:58:27
 * @Last Modified by:   Beinan
-* @Last Modified time: 2014-11-13 17:33:31
+* @Last Modified time: 2014-11-16 20:07:42
 */
 
 package controllers
@@ -59,6 +59,19 @@ object MainController extends Controller with MongoController{
   import reactivemongo.core.commands._
   import play.modules.reactivemongo.json.BSONFormats._
 
+  def query() = Action.async{ request =>
+      request.body.asJson.map{ json =>
+        val futureObjsList: Future[List[JsObject]] = collection.
+          find(json).
+          cursor[JsObject].
+          collect[List]()
+
+        futureObjsList.map { objs =>
+          Ok(Json.toJson(objs))
+        }        
+      }.get
+  }
+
   def mapReduce(coll: String) = Action.async{ request =>
       request.body.asJson.map{ json =>
         val map = (json \ "map").as[String]
@@ -79,7 +92,8 @@ object MainController extends Controller with MongoController{
   def javascriptRoutes = Action { implicit request =>
     Ok(Routes.javascriptRouter("jsRoutes")(
       routes.javascript.MainController.getMessage,
-      routes.javascript.MainController.mapReduce
+      routes.javascript.MainController.mapReduce,
+      routes.javascript.MainController.query
     )).as(JAVASCRIPT)
   }
 }
