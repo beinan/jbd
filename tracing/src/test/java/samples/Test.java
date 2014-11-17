@@ -2,7 +2,7 @@
 * @Author: troya
 * @Date:   2014-11-06 16:08:43
 * @Last Modified by:   Beinan
-* @Last Modified time: 2014-11-08 18:17:24
+* @Last Modified time: 2014-11-16 22:04:35
 */
 
 package samples;
@@ -14,9 +14,7 @@ public class Test {
     public static void main(String[] args) {
     	System.out.println(add(5,3));
     	Test t = new Test();
-    	synchronized(t){
-    		t.a = 5;
-    	}
+    	
     	
     }
 

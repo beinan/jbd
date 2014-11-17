@@ -30,9 +30,18 @@ define [
         msg_type: "method_enter", 
         (data)->
           console.log data
-          a = that.diagram.addActor("Me")
+          me = that.diagram.addActor("Me")
           invoke_desc = data[0]["method_desc"]
-          that.diagram.addActor(invoke_desc.split('#')[0])
+          invokee = that.diagram.addActor(invoke_desc.split('#')[0])
+          
+          #enter point
+          method_name = invoke_desc.split('#')[1].split('(')[0] + "()"
+                    
+          s = that.diagram.addSignal(me, 1, 2, invokee, method_name)          
+          method_lifeline = invokee.addLifeline(method_name)
+          method_lifeline.addSignal(s)
+
+
           that.draw()
           
     
