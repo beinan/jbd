@@ -2,7 +2,7 @@
 * @Author: Beinan
 * @Date:   2014-11-08 16:07:14
 * @Last Modified by:   Beinan
-* @Last Modified time: 2014-11-14 20:23:33
+* @Last Modified time: 2014-11-22 16:54:42
 */
 
 package edu.syr.jbd.tracing.weaving
@@ -38,16 +38,18 @@ class SynchronizedFieldTrackerClassAdapter(cv: ClassVisitor) extends ClassVisito
    */
   override def visitField(access:Int, name:String, desc:String,
             signature:String, value:Object):FieldVisitor = {
-    //create lock field
-    
-    cv.visitField(access, lock_field_name(name), lock_desc, null, null);
-    locks = lock_field_name(name)::locks //add lock field name to locks list, which will be used in constructor to initialize the value
+    if((access & Opcodes.ACC_STATIC) == 0){ //only for non-static field so far.
 
-    //create getter
-    generateGetter(access, name, desc, signature)
+      //create lock field    
+      cv.visitField(access, lock_field_name(name), lock_desc, null, null);
+      locks = lock_field_name(name)::locks //add lock field name to locks list, which will be used in constructor to initialize the value
 
-    //create setter
-    generateSetter(access, name, desc, signature)
+      //create getter
+      generateGetter(access, name, desc, signature)
+
+      //create setter
+      generateSetter(access, name, desc, signature)
+    }
 
     return cv.visitField(access, name, desc, signature, value)
   }

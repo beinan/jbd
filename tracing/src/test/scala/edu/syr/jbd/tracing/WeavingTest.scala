@@ -1,8 +1,8 @@
 /* 
 * @Author: troya
 * @Date:   2014-11-06 15:38:26
-* @Last Modified by:   troya
-* @Last Modified time: 2014-11-06 17:21:56
+* @Last Modified by:   Beinan
+* @Last Modified time: 2014-11-22 16:38:36
 */
 
 package edu.syr.jbd.tracing
@@ -30,7 +30,7 @@ class WeavingTest extends Specification{
 object Executor{
   def exec = {
     val loader = new ControlledClassLoader(Executor.getClass.getClassLoader)
-    val clazz: Class[_] = loader.loadClass("samples.Test")
+    val clazz: Class[_] = loader.loadClass("samples.concurrent.Plant")
     val method: Method = clazz.getMethod("main", classOf[Array[String]])
     val params: Array[String] = null
     val startExecTime: Long = System.currentTimeMillis

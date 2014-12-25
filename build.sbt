@@ -12,5 +12,5 @@ lazy val tracing = project
 
 lazy val examples = project
 
-lazy val virtualization = project.dependsOn(tracing).enablePlugins(PlayScala)
+lazy val visualization = project.dependsOn(tracing).enablePlugins(PlayScala)
 
