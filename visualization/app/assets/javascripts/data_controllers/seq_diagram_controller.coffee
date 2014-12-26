@@ -1,10 +1,14 @@
+# CoffeeScript
+# @Author: Beinan
+# @Date:   2014-12-24 22:09:52
+# @Last Modified by:   Beinan
+# @Last Modified time: 2014-12-25 17:39:44
 define [
   "jquery"
   "d3"
   "raphael"
   "seq_diagram/diagram"
-  "data_controllers/seq_diagram_data_filter"
-], ($, d3, Raphael, Diagram, DiagramDataFilter) ->
+], ($, d3, Raphael, Diagram) ->
   
   dbQuery = (q, callback) ->
     qr = jsRoutes.controllers.MainController.query()
@@ -27,9 +31,6 @@ define [
     constructor: (container)->
       @diagram = new Diagram()
       @container = container
-      @dataFilter = new DiagramDataFilter
-        selectionChanged: (data) ->
-          console.log "dataFilter updated", data
           
       controller = this
       @diagram.on "selection_change", (dom, data)->

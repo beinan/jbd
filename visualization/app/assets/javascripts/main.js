@@ -2,7 +2,7 @@
 * @Author: Beinan
 * @Date:   2014-11-09 16:17:40
 * @Last Modified by:   Beinan
-* @Last Modified time: 2014-12-24 18:04:51
+* @Last Modified time: 2014-12-25 16:58:04
 */
 
 require.config({
@@ -12,6 +12,7 @@ require.config({
     'underscore' : 'libs/underscore-min',
     'd3' : 'libs/d3',
     'raphael': 'libs/raphael',
+    'backbone': 'libs/backbone',
     'routes' : "routes"
   },
   shim: {
@@ -25,6 +26,11 @@ require.config({
       deps: ["raphael", "underscore"], 
       exports: "gram"
     },
+    backbone: {
+      deps: ["underscore", "jquery"],
+      exports: "Backbone"
+
+    },
     routes:{
       exports: "jsRoutes"
     }
@@ -32,15 +38,11 @@ require.config({
 });
 
 
-require(["easyui", "data_controllers/seq_diagram_controller"],
-  function(ingore, SeqDiagramController, routes) {
-
-  console.log(SeqDiagramController);
-  var sdc = new SeqDiagramController("#diagram");
-  sdc.start();
-
-  console.log("routes", routes);        
-
+require(["easyui", "app_router"],
+  function(ingore, AppRouter) {
+  
+  new AppRouter;
+  
   //     }
   // }); 
   // var diagram = new Diagram();
