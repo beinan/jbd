@@ -18,20 +18,22 @@ define [
           {field:'thread_count',title:'Thread Count',width:90,align:'right'},          
           {title:'Selected',field:'ck', checkbox:true,width:80},
         ]]
-        onCheck: @rowOnCheck #bind event on checkbox selected
-        onUncheck: @rowOnUncheck  #bind event on checkbox unselected
-    
+        onCheck: (row, index)-> #bind event on checkbox selected
+          console.log "row selected", row
+          options.record_filters.add
+            id: row.filter_string
+            type: row.filter_type
+      
+        onUncheck: (row, index)->  #bind event on checkbox unselected
+          console.log "row unselected", row
+          options.record_filters.remove
+            id: row.filter_string
+            type: row.filter_type    
+
       $('#search-result-treegrid').treegrid(treegrid_options)        
       $("#class-search-box").searchbox     
         searcher: @searcher #bind searcher function
 
-    rowOnCheck: (row, index)->
-      console.log "row selected", row
-      @options.record_filters.add
-        key: row._id
-        
-    rowOnUncheck: (index, row)->
-      console.log index, row
       
      
     pop: ()->
@@ -45,6 +47,8 @@ define [
           entry.children = []
           entry.id = ++counter
           entry.state = "closed"
+          entry.filter_type = "class"
+          entry.filter_string = entry._id
           for method_name, value of entry.value  #for each method
             invocation_entry = 
               id: ++counter
@@ -52,8 +56,10 @@ define [
               invocation_count: value.count
               class_name: entry._id  #for further query
               state: "closed"
+              filter_type: "method"
+              filter_string : entry._id + "#" + method_name
               children: []  #for easyui tree structure
-            
+               
             thread_count = 0
             for thread_id, thread_invo_count of value.thread_info
               #for each thread of each method invocation

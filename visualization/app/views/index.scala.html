@@ -5,8 +5,8 @@
 
     <div class="easyui-panel" title="Java Execution Visualiztion" style="width:100%;height:500px;padding:10px;">
         <div style="padding:5px 0;">
-            <a href="#pop_class_method_filter" class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:100px">Search</a>
-            <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-print'" style="width:100px">Print</a>
+            <a href="#pop_class_method_filter" class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:100px">Actor Filter</a>
+            <a href="#pop_signal_filter" class="easyui-linkbutton" data-options="iconCls:'icon-print'" style="width:100px">Signal Filter</a>
             <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-reload'" style="width:100px">Reload</a>
             <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-help'" style="width:100px">
                 Properties
@@ -40,6 +40,21 @@
             <table id="search-result-treegrid" style="width:550px;"></table>
             
         </div>
+
+        <div id="signal-filter-window" class="easyui-window" title="Signal Filter" data-options="closed:true,iconCls:'icon-pencil'" style="width:560px;height:500px;">
+            <h4>Signal Filter</h4>
+            <div style="margin:20px 0;"></div>
+            <input class="easyui-searchbox" data-options="prompt:'Please Input Value',menu:'#class-search-menu'" style="width:300px" id="class-search-box"></input>
+            <a href="#" id="search-result-selection-apply" class="easyui-linkbutton" data-options="iconCls:'icon-reload'" style="width:120px">Apply Selection</a>
+
+            <div id="class-search-menu">
+                <div data-options="name:'method_enter',iconCls:'icon-ok'">Method Invocation</div>
+                <div data-options="name:'source-only'">Class with source code</div>
+            </div>
+            <table id="search-result-treegrid" style="width:550px;"></table>
+            
+        </div>
+
 
     </div>
 

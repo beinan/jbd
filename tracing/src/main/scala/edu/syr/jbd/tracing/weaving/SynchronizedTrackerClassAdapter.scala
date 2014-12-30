@@ -2,7 +2,7 @@
 * @Author: Beinan
 * @Date:   2014-11-08 16:07:14
 * @Last Modified by:   Beinan
-* @Last Modified time: 2014-11-22 16:54:42
+* @Last Modified time: 2014-12-29 22:50:53
 */
 
 package edu.syr.jbd.tracing.weaving
@@ -23,7 +23,8 @@ class SynchronizedFieldTrackerClassAdapter(cv: ClassVisitor) extends ClassVisito
     super.visit(version, access, name, signature, superName, interfaces)
   }
 
-  override def visitMethod(access: Int, name: String, desc: String, signature: String, exceptions: Array[String]): MethodVisitor = {
+  override def visitMethod(access: Int, name: String, desc: String, 
+    signature: String, exceptions: Array[String]): MethodVisitor = {
     println("method-visited:" + name)
     val mv: MethodVisitor = cv.visitMethod(access, name, desc, signature, exceptions)
     
@@ -150,10 +151,11 @@ class SynchronizedFieldTrackerClassAdapter(cv: ClassVisitor) extends ClassVisito
       }
       if(f_type.getSort() <= 8){ //primitive type, do boxing
         box(f_type)
-      }
+      }      
+      mv.visitVarInsn(Opcodes.ALOAD, 0)  //load obj ref of the owner
       push(owner + "@" + name + "," + desc)   
       mv.visitMethodInsn(Opcodes.INVOKESTATIC, "edu/syr/jbd/tracing/JBDTrace", 
-          "traceFieldGetter", "("+ lock_desc+"Ljava/lang/Object;Ljava/lang/String;)V")//long, int, object
+          "traceFieldGetter", "("+ lock_desc+"Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;)V")//long, int, object
    
       //release lock
       mv.visitVarInsn(Opcodes.ALOAD, 0)    
@@ -193,9 +195,11 @@ class SynchronizedFieldTrackerClassAdapter(cv: ClassVisitor) extends ClassVisito
       if(f_type.getSort() <= 8){ //primitive type, do boxing
         box(f_type)
       }
+      mv.visitVarInsn(Opcodes.ALOAD, 0)  //load obj ref of the owner      
       push(owner + "@" + name + "," + desc)   
       mv.visitMethodInsn(Opcodes.INVOKESTATIC, "edu/syr/jbd/tracing/JBDTrace", 
-          "traceFieldSetter", "("+ lock_desc+"Ljava/lang/Object;Ljava/lang/String;)V")//long, int, object
+          "traceFieldSetter", 
+          "("+ lock_desc+"Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;)V")//long, int, object
    
       //release lock
       mv.visitVarInsn(Opcodes.ALOAD, 0)    

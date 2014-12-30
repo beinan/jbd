@@ -2,7 +2,7 @@
 * @Author: troya
 * @Date:   2014-11-06 17:19:37
 * @Last Modified by:   Beinan
-* @Last Modified time: 2014-11-14 21:29:11
+* @Last Modified time: 2014-12-29 22:36:15
 */
 package edu.syr.jbd.tracing.weaving
 
@@ -41,6 +41,8 @@ class TraceMethodAdapter(api : Int, mv : MethodVisitor, owner: String,
   val method_key = owner + "#" + name + desc
   
   var local_var_invoc_id : Int = -1
+
+  var local_var_tmp_invoc_id : Int = -1
   /**
    * tracing method invocation with the values of parameters
    */
@@ -48,13 +50,21 @@ class TraceMethodAdapter(api : Int, mv : MethodVisitor, owner: String,
     val types = Type.getArgumentTypes(desc)
     val off = if(is_static) 0 else 1  //local var 0 is "this" for non-static method
     local_var_invoc_id = newLocal(Type.LONG_TYPE)
+    local_var_tmp_invoc_id = newLocal(Type.LONG_TYPE)
 
     push(method_key) 
+    if(is_static){
+      //traceStaticMethodEnter will return an invocation id
+      mv.visitMethodInsn(Opcodes.INVOKESTATIC, "edu/syr/jbd/tracing/JBDTrace", 
+        "traceStaticMethodEnter", "(Ljava/lang/String;)J")
+    }
+    else{
+      mv.visitVarInsn(Opcodes.ALOAD, 0)  //load "this"
+      mv.visitMethodInsn(Opcodes.INVOKESTATIC, "edu/syr/jbd/tracing/JBDTrace", 
+        "traceNonStaticMethodEnter", "(Ljava/lang/String;Ljava/lang/Object;)J")
+    }
     
-    //traceMethodEnter will return an invocation id
-    mv.visitMethodInsn(Opcodes.INVOKESTATIC, "edu/syr/jbd/tracing/JBDTrace", 
-      "traceMethodEnter", "(Ljava/lang/String;)J")
-    dup2()  //dup invocation id
+    dup2()  //dup invocation id which is long
     mv.visitVarInsn(Opcodes.LSTORE, local_var_invoc_id) //store to local var for further usage
     types.foldLeft[Int](off){ //trace each argument of the current method invocation
       (pos:Int, a_type:Type) =>
@@ -94,7 +104,8 @@ class TraceMethodAdapter(api : Int, mv : MethodVisitor, owner: String,
       //load invocation_id of the invoker (actuall it's the parent of this returned method invocation)
       mv.visitVarInsn(Opcodes.LLOAD, local_var_invoc_id)
       mv.visitMethodInsn(Opcodes.INVOKESTATIC, "edu/syr/jbd/tracing/JBDTrace", 
-        "traceMethodInvocation", "(Ljava/lang/String;J)V")
+        "traceMethodInvocation", "(Ljava/lang/String;J)J")
+      mv.visitVarInsn(Opcodes.LSTORE, local_var_tmp_invoc_id) //store to local var for tracing this method return
     }
     
     super.visitMethodInsn(opcode, owner, name, desc, itf)
@@ -113,8 +124,10 @@ class TraceMethodAdapter(api : Int, mv : MethodVisitor, owner: String,
       push(invokee_method_key) 
       //load invocation_id of the invoker (actuall it's the parent of this returned method invocation)
       mv.visitVarInsn(Opcodes.LLOAD, local_var_invoc_id)
+      //load invocation_id of the invokee
+      mv.visitVarInsn(Opcodes.LLOAD, local_var_tmp_invoc_id)
       mv.visitMethodInsn(Opcodes.INVOKESTATIC, "edu/syr/jbd/tracing/JBDTrace", 
-        "traceReturnValue", "(Ljava/lang/Object;Ljava/lang/String;J)V")
+        "traceReturnValue", "(Ljava/lang/Object;Ljava/lang/String;JJ)V")
     }
   }
   

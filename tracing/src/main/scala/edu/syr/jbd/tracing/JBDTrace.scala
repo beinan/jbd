@@ -2,7 +2,7 @@
 * @Author: Beinan
 * @Date:   2014-11-06 21:25:10
 * @Last Modified by:   Beinan
-* @Last Modified time: 2014-11-14 21:48:42
+* @Last Modified time: 2014-12-29 22:39:17
 */
 package edu.syr.jbd.tracing
 
@@ -18,7 +18,7 @@ object JBDTrace{
   
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  def traceMethodEnter(method_desc:String):Long = {
+  def traceStaticMethodEnter(method_desc:String):Long = {
     val invocation_id = local.get.count
     val doc = BSONDocument(
       "jvm_name" -> jvm_name,
@@ -26,6 +26,21 @@ object JBDTrace{
       "invocation_id" -> invocation_id,
       "method_desc" -> method_desc,
       "msg_type" -> "method_enter",
+      "created_datetime" -> BSONDateTime(System.currentTimeMillis))
+    
+    MongoDB.coll("trace").insert(doc)   
+    return invocation_id 
+  }
+  
+  def traceNonStaticMethodEnter(method_desc:String, owner_ref:Object):Long = {
+    val invocation_id = local.get.count
+    val doc = BSONDocument(
+      "jvm_name" -> jvm_name,
+      "thread_id" -> Thread.currentThread().getId(),
+      "invocation_id" -> invocation_id,
+      "method_desc" -> method_desc,
+      "msg_type" -> "method_enter",
+      "owner_ref" -> System.identityHashCode(owner_ref),
       "created_datetime" -> BSONDateTime(System.currentTimeMillis))
     
     MongoDB.coll("trace").insert(doc)   
@@ -49,7 +64,7 @@ object JBDTrace{
 
   }
 
-  def traceMethodInvocation(method_desc: String, parent_invocation_id:Long){
+  def traceMethodInvocation(method_desc: String, parent_invocation_id:Long):Long = {
     val invocation_id = local.get.count    
     val doc = BSONDocument(
       "jvm_name" -> jvm_name,
@@ -61,15 +76,17 @@ object JBDTrace{
       "created_datetime" -> BSONDateTime(System.currentTimeMillis))
     
     MongoDB.coll("trace").insert(doc)   
+    return invocation_id
   }
 
-  def traceReturnValue(return_val: AnyRef, method_desc: String, parent_invocation_id:Long){
+  def traceReturnValue(return_val: AnyRef, method_desc: String, parent_invocation_id:Long, invokee_id:Long){
     val invocation_id = local.get.count    
     val doc = BSONDocument(
       "jvm_name" -> jvm_name,
       "thread_id" -> Thread.currentThread().getId(),
       "invocation_id" -> invocation_id,
       "parent_invocation_id" -> parent_invocation_id,
+      "invokee_id" -> invokee_id,
       "value" -> String.valueOf(return_val),
       "method_desc" -> method_desc,
       "msg_type" -> "method_return",
@@ -79,7 +96,7 @@ object JBDTrace{
 
   }
 
-  def traceFieldGetter(counter:JBDLocalValue, value: AnyRef, field:String){
+  def traceFieldGetter(counter:JBDLocalValue, value: AnyRef, owner_ref: AnyRef, field:String){
     val invocation_id = local.get.count
     val doc = BSONDocument(
       "jvm_name" -> jvm_name,
@@ -88,13 +105,14 @@ object JBDTrace{
       "invocation_id" -> invocation_id,
       "version" -> counter.get,
       "field" -> field,
+      "owner_ref" -> System.identityHashCode(owner_ref),
       "msg_type" -> "field_getter",      
       "created_datetime" -> BSONDateTime(System.currentTimeMillis))
     
     MongoDB.coll("trace").insert(doc)   
   }
 
-  def traceFieldSetter(counter:JBDLocalValue, value: AnyRef, field:String){
+  def traceFieldSetter(counter:JBDLocalValue, value: AnyRef, owner_ref: AnyRef, field:String){
     val invocation_id = local.get.count
     val doc = BSONDocument(
       "jvm_name" -> jvm_name,
@@ -103,6 +121,7 @@ object JBDTrace{
       "invocation_id" -> invocation_id,
       "version" -> counter.count,
       "field" -> field,
+      "owner_ref" -> System.identityHashCode(owner_ref),
       "msg_type" -> "field_setter",      
       "created_datetime" -> BSONDateTime(System.currentTimeMillis))
     
