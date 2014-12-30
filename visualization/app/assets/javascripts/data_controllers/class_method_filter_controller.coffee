@@ -1,6 +1,6 @@
 define [
   "jquery"
-  "mapreducer/group_by_method"
+  "db/group_by_method"
 ], ($, GroupByMethod) ->
   
   class ClassMethodFilterController

@@ -2,36 +2,21 @@
 # @Author: Beinan
 # @Date:   2014-12-24 22:09:52
 # @Last Modified by:   Beinan
-# @Last Modified time: 2014-12-29 21:40:32
+# @Last Modified time: 2014-12-29 23:15:01
 define [
   "jquery"
+  "db/db_query"
   "models/actor"  
   "collections/actor_coll"
   "collections/signal_coll"
   "views/seq_diagram_view"
-], ($, Actor, ActorColl, SignalColl, SeqDiagramView) ->
+], ($, dbQuery, Actor, ActorColl, SignalColl, SeqDiagramView) ->
   
-  dbQuery = (q, callback) ->
-    console.log "a mongodb query is sending", q
-    qr = jsRoutes.controllers.MainController.query()
-    $.ajax
-      url: qr.url
-      type: qr.type
-      dataType: "json"
-      contentType: "application/json; charset=utf-8"
-      data: JSON.stringify(q)
-      success: callback
-
+  
   class MethodDesc
     constructor: (desc) ->
       @owner = desc.split('#')[0]
       @method = desc.split('#')[1].split('(')[0] + "()"
-
-
-  class DataUpdateEventHandler
-    constructor: (diagram, actors)->
-      actors.on "add", (actor)->
-        console.log "actor created", actor
 
 
   class SeqDiagramController
@@ -40,14 +25,13 @@ define [
       @options = options
       @actors = new ActorColl()
       @signals = new SignalColl()
-      @eventHandler = new DataUpdateEventHandler @diagram, @actors
       @diagram_view = new SeqDiagramView
         collection:@actors
 
       controller = this
       options.record_filters.on "add", (filter)->
         #console.log "data filter added" , filter
-        dbQuery filter.mongo_query_obj(),
+        dbQuery filter.mongo_query_obj("method_enter"),
           (data)->
             #console.log "data filter:query result",data
             for method_entry in data

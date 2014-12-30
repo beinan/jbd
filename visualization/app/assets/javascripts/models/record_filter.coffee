@@ -2,7 +2,7 @@
 # @Author: Beinan
 # @Date:   2014-12-25 17:27:28
 # @Last Modified by:   Beinan
-# @Last Modified time: 2014-12-27 16:48:33
+# @Last Modified time: 2014-12-29 23:12:43
 
 define [
   "backbone"
@@ -12,7 +12,7 @@ define [
     initialize: ()->
   
     #generate a mongodb query object  
-    mongo_query_obj: ->
+    mongo_query_obj(msg_type): ->
       if(@get("type") is "class")
         method_desc_cri = 
           "$regex": "^" + @get("id")
@@ -21,7 +21,7 @@ define [
 
       query_obj = 
         method_desc: method_desc_cri
-        msg_type: "method_enter"
+        msg_type: msg_type
 
       query_obj
   return RecordFilter
