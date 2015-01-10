@@ -2,7 +2,7 @@
 * @Author: Beinan
 * @Date:   2014-11-08 16:07:14
 * @Last Modified by:   Beinan
-* @Last Modified time: 2014-12-29 22:50:53
+* @Last Modified time: 2015-01-03 17:35:28
 */
 
 package edu.syr.jbd.tracing.weaving
@@ -12,7 +12,8 @@ import org.objectweb.asm.util._
 import org.objectweb.asm.commons.AdviceAdapter
 
 
-class SynchronizedFieldTrackerClassAdapter(cv: ClassVisitor) extends ClassVisitor(Opcodes.ASM4, cv) with Opcodes {
+class SynchronizedFieldTrackerClassAdapter(cv: ClassVisitor) extends ClassVisitor(Opcodes.ASM4, cv) 
+  with Opcodes with JBDWeavingTrait{
   
   private var owner: String = null
   private var locks: List[String] = Nil
@@ -55,12 +56,6 @@ class SynchronizedFieldTrackerClassAdapter(cv: ClassVisitor) extends ClassVisito
     return cv.visitField(access, name, desc, signature, value)
   }
   
-  //lock object is also a version counter for the field
-  private val lock_desc = "Ledu/syr/jbd/tracing/JBDLocalValue;"
-  private def lock_field_name(name : String) = "__jbd_lock_" + name
-
-  private def getter_name = "__get_" + _
-  private def getter_desc = "()" + _
   private def generateGetter(access:Int, name:String, desc:String,
             signature: String) {
     
@@ -68,8 +63,6 @@ class SynchronizedFieldTrackerClassAdapter(cv: ClassVisitor) extends ClassVisito
     new FieldGetterAdapter(api, mv, owner, access, name, desc).generate()    
   }
 
-  private def setter_name = "__set_" + _
-  private def setter_desc:String => String = "(" + _  + ")V"
   private def generateSetter(access:Int, name:String, desc:String,
             signature:String) {
     val f_type =  Type.getType(desc) //field type
@@ -106,23 +99,7 @@ class SynchronizedFieldTrackerClassAdapter(cv: ClassVisitor) extends ClassVisito
         }
       }
     }
-    /**
-     * translate putfield, getfield to getter and setter method
-     */
-    override def visitFieldInsn(opcode : Int, owner : String, 
-      name : String, desc : String){
-      val field_key = owner + "@" + name + desc;
-      val f_type = Type.getType(desc)
-      if(opcode == Opcodes.PUTFIELD){
-        //invoke setter
-        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, owner, "__set_"+name, "(" + desc  + ")V")
-      }else if(opcode == Opcodes.GETFIELD){
-        //invoke setter
-        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, owner, getter_name(name), getter_desc(desc))
-      }else{
-        super.visitFieldInsn(opcode, owner, name, desc)
-      }
-    }  
+      
   } 
 
   class FieldGetterAdapter(api : Int, mv : MethodVisitor, owner: String,
@@ -154,9 +131,10 @@ class SynchronizedFieldTrackerClassAdapter(cv: ClassVisitor) extends ClassVisito
       }      
       mv.visitVarInsn(Opcodes.ALOAD, 0)  //load obj ref of the owner
       push(owner + "@" + name + "," + desc)   
+      mv.visitVarInsn(Opcodes.LLOAD, 1)  //load parent invocation id
       mv.visitMethodInsn(Opcodes.INVOKESTATIC, "edu/syr/jbd/tracing/JBDTrace", 
-          "traceFieldGetter", "("+ lock_desc+"Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;)V")//long, int, object
-   
+          "traceFieldGetter", "("+ lock_desc+"Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;J)V")//long, int, object
+      
       //release lock
       mv.visitVarInsn(Opcodes.ALOAD, 0)    
       mv.visitFieldInsn(Opcodes.GETFIELD, owner, lock_field_name(name), lock_desc)
@@ -197,9 +175,12 @@ class SynchronizedFieldTrackerClassAdapter(cv: ClassVisitor) extends ClassVisito
       }
       mv.visitVarInsn(Opcodes.ALOAD, 0)  //load obj ref of the owner      
       push(owner + "@" + name + "," + desc)   
+      //load parent invocation id, which is the second parameter
+      //the first parameter is the new field value, so 1 + f_type.getSize() can get the proper postion of p_v_i
+      mv.visitVarInsn(Opcodes.LLOAD, 1 + f_type.getSize())  
       mv.visitMethodInsn(Opcodes.INVOKESTATIC, "edu/syr/jbd/tracing/JBDTrace", 
           "traceFieldSetter", 
-          "("+ lock_desc+"Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;)V")//long, int, object
+          "("+ lock_desc+"Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;J)V")
    
       //release lock
       mv.visitVarInsn(Opcodes.ALOAD, 0)    

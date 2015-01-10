@@ -2,7 +2,7 @@
 * @Author: Beinan
 * @Date:   2014-11-06 21:25:10
 * @Last Modified by:   Beinan
-* @Last Modified time: 2014-12-29 22:39:17
+* @Last Modified time: 2015-01-03 17:26:28
 */
 package edu.syr.jbd.tracing
 
@@ -96,13 +96,15 @@ object JBDTrace{
 
   }
 
-  def traceFieldGetter(counter:JBDLocalValue, value: AnyRef, owner_ref: AnyRef, field:String){
+  def traceFieldGetter(counter:JBDLocalValue, value: AnyRef, 
+    owner_ref: AnyRef, field:String, parent_inv_id: Long){
     val invocation_id = local.get.count
     val doc = BSONDocument(
       "jvm_name" -> jvm_name,
       "thread_id" -> Thread.currentThread().getId(),
       "value" -> String.valueOf(value),
       "invocation_id" -> invocation_id,
+      "parent_invocation_id" -> parent_inv_id,
       "version" -> counter.get,
       "field" -> field,
       "owner_ref" -> System.identityHashCode(owner_ref),
@@ -112,13 +114,15 @@ object JBDTrace{
     MongoDB.coll("trace").insert(doc)   
   }
 
-  def traceFieldSetter(counter:JBDLocalValue, value: AnyRef, owner_ref: AnyRef, field:String){
+  def traceFieldSetter(counter:JBDLocalValue, value: AnyRef, 
+    owner_ref: AnyRef, field:String, parent_inv_id: Long){
     val invocation_id = local.get.count
     val doc = BSONDocument(
       "jvm_name" -> jvm_name,
       "thread_id" -> Thread.currentThread().getId(),
       "value" -> String.valueOf(value),
       "invocation_id" -> invocation_id,
+      "parent_invocation_id" -> parent_inv_id,
       "version" -> counter.count,
       "field" -> field,
       "owner_ref" -> System.identityHashCode(owner_ref),

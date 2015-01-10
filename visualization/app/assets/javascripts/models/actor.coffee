@@ -2,7 +2,7 @@
 # @Author: Beinan
 # @Date:   2014-12-27 17:13:48
 # @Last Modified by:   Beinan
-# @Last Modified time: 2014-12-29 18:04:15
+# @Last Modified time: 2015-01-09 16:12:02
 
 
 define [
@@ -10,8 +10,14 @@ define [
 ], (Backbone) ->
 
   class Lifeline extends Backbone.Model
-    initialize:()->
+    @lifeline_dict: {}  
     
+    initialize:()->
+      Lifeline.lifeline_dict[this.id] = this
+    
+    @lookup_lifeline: (lifeline_id) ->
+      @lifeline_dict[lifeline_id]
+
   class LifelineColl extends Backbone.Collection
     model: Lifeline
 
@@ -28,12 +34,11 @@ define [
       title
 
     add_lifeline: (data)->
-      Actor.lifeline_dict[data.id] = this
+      data.actor = this
       @lifelines.add(data)
 
-    @lifeline_dict: {}  
-    @lookup_actor_by_lifeline_id:(lifeline_id)->
-      @lifeline_dict[lifeline_id]
+    @lookup_lifeline:(lifeline_id)->
+      Lifeline.lookup_lifeline(lifeline_id)
 
   return Actor
 

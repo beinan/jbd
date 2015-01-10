@@ -2,7 +2,7 @@
 * @Author: troya
 * @Date:   2014-11-06 17:19:37
 * @Last Modified by:   Beinan
-* @Last Modified time: 2014-12-29 22:36:15
+* @Last Modified time: 2015-01-03 17:18:57
 */
 package edu.syr.jbd.tracing.weaving
 
@@ -34,7 +34,8 @@ class MethodInvocationTrackerClassAdapter(cv: ClassVisitor) extends ClassVisitor
 
 class TraceMethodAdapter(api : Int, mv : MethodVisitor, owner: String,
   access : Int, name : String, desc : String) 
-    extends AdviceAdapter(api, mv, access, name, desc) with Opcodes {
+    extends AdviceAdapter(api, mv, access, name, desc) 
+    with Opcodes with JBDWeavingTrait{
 
   lazy val is_static = (access & Opcodes.ACC_STATIC) != 0
   
@@ -131,8 +132,27 @@ class TraceMethodAdapter(api : Int, mv : MethodVisitor, owner: String,
     }
   }
   
+  /**
+   * trace field
+   * translate putfield, getfield to getter and setter method
+   */
+  override def visitFieldInsn(opcode : Int, owner : String, 
+    name : String, desc : String){
+    val field_key = owner + "@" + name + desc;
+    val f_type = Type.getType(desc)
+    if(opcode == Opcodes.PUTFIELD){
+      mv.visitVarInsn(Opcodes.LLOAD, local_var_invoc_id)
+      //invoke setter
+      mv.visitMethodInsn(Opcodes.INVOKESPECIAL, owner, setter_name(name), setter_desc(desc))
+    }else if(opcode == Opcodes.GETFIELD){
+      mv.visitVarInsn(Opcodes.LLOAD, local_var_invoc_id)
+      //invoke setter
+      mv.visitMethodInsn(Opcodes.INVOKESPECIAL, owner, getter_name(name), getter_desc(desc))
+    }else{
+      super.visitFieldInsn(opcode, owner, name, desc)
+    }
+  }
 
-  
-  
+
 }
 

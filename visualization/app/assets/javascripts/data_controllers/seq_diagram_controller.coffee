@@ -2,15 +2,13 @@
 # @Author: Beinan
 # @Date:   2014-12-24 22:09:52
 # @Last Modified by:   Beinan
-# @Last Modified time: 2014-12-29 23:15:01
+# @Last Modified time: 2015-01-09 16:54:41
 define [
   "jquery"
   "db/db_query"
   "models/actor"  
-  "collections/actor_coll"
-  "collections/signal_coll"
   "views/seq_diagram_view"
-], ($, dbQuery, Actor, ActorColl, SignalColl, SeqDiagramView) ->
+], ($, dbQuery, Actor, SeqDiagramView) ->
   
   
   class MethodDesc
@@ -23,8 +21,8 @@ define [
     
     constructor: (options)->
       @options = options
-      @actors = new ActorColl()
-      @signals = new SignalColl()
+      @actors = options.actors
+      @signals = options.signals
       @diagram_view = new SeqDiagramView
         collection:@actors
 
@@ -72,11 +70,32 @@ define [
         method_name: method_desc.method
         thread_id: method_entry.thread_id
         invocation_id: method_entry.invocation_id
+      @query_field_visitor(actor, lifeline)  
+      @query_invoker_signals(actor, lifeline)
 
-      @query_invokder_signals(actor, lifeline)
+    query_field_visitor: (from_actor, from_lifeline)->
+      controller = this
+      #query the invoker information
+      dbQuery
+        parent_invocation_id: from_lifeline.get("invocation_id")
+        thread_id: from_lifeline.get("thread_id")
+        msg_type: {"$regex": "^field_"}  #field_setter or field_getter
+        , (data) ->
+          for field_visitor in data
+            from_id = from_lifeline.id
+            to_id = field_visitor.invocation_id + "@" + field_visitor.thread_id
+            #console.log "field_visitor", field_visitor
+            signal = controller.signals.add
+              id: to_id #todo: now using to_id as the id, which may be not unique
+              from_id: from_id
+              to_id: to_id
+              thread_id: field_visitor.thread_id
+              invocation_id: field_visitor.invocation_id
 
+            signal.set_field_visitor(field_visitor)
 
-    query_invokder_signals:(to_actor, to_lifeline)->
+    query_invoker_signals:(to_actor, to_lifeline)->
+      controller = this
       #query the invoker information
       dbQuery
         invocation_id: to_lifeline.get("invocation_id") - 1
@@ -86,9 +105,12 @@ define [
           if(data.length > 0)
             from_id = data[0].parent_invocation_id + "@" + data[0].thread_id
             to_id = to_lifeline.id
-            @signals.add
+            controller.signals.add
+              id: to_id #todo: now using to_id as the id, which may be not unique
               from_id: from_id
               to_id: to_id
+              thread_id: to_lifeline.get("thread_id")
+              invocation_id: to_lifeline.get("invocation_id") - 1
 
     # query_signals: (from_actor, from_lifeline)->
     #   #TODO:jvm id

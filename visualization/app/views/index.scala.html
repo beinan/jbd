@@ -8,10 +8,12 @@
             <a href="#pop_class_method_filter" class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:100px">Actor Filter</a>
             <a href="#pop_signal_filter" class="easyui-linkbutton" data-options="iconCls:'icon-print'" style="width:100px">Signal Filter</a>
             <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-reload'" style="width:100px">Reload</a>
-            <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-help'" style="width:100px">
-                Properties
+            <a href="#pop_reasoning" class="easyui-linkbutton" data-options="iconCls:'icon-help'" style="width:100px">
+                Reasoning
             </a>
         </div>
+       
+
         <svg id='diagram' width="1500" height="2500">
             <defs>
                 <marker id="Triangle" viewBox="0 0 10 10" refX="1" refY="5" 
@@ -21,6 +23,14 @@
                 </marker>
             </defs>
         </svg>
+
+            
+        </svg>
+
+        <div id="reasoning-window" class="easyui-window" title="Reasoning Window" data-options="closed:true,iconCls:'icon-pencil'" style="width:300px;height:400px;">
+           <svg id='reasoning-graph' width="1500" height="1500">
+          
+        </div>
 
         <div id="prop-window" class="easyui-window" title="Properties Window" data-options="closed:true,iconCls:'icon-pencil'" style="width:300px;height:400px;">
            <table id="prop-grid" style="width:300px"></table> 
@@ -44,14 +54,129 @@
         <div id="signal-filter-window" class="easyui-window" title="Signal Filter" data-options="closed:true,iconCls:'icon-pencil'" style="width:560px;height:500px;">
             <h4>Signal Filter</h4>
             <div style="margin:20px 0;"></div>
-            <input class="easyui-searchbox" data-options="prompt:'Please Input Value',menu:'#class-search-menu'" style="width:300px" id="class-search-box"></input>
-            <a href="#" id="search-result-selection-apply" class="easyui-linkbutton" data-options="iconCls:'icon-reload'" style="width:120px">Apply Selection</a>
+            <div class="tree well">
+    <ul>
+        <li>
+            <span><i class="icon-folder-open"></i> Parent</span> <a href="">Goes somewhere</a>
+            <ul>
+                <li>
+                    <span><i class="icon-minus-sign"></i> Child</span> <a href="">Goes somewhere</a>
+                    <ul>
+                        <li>
+                            <span><i class="icon-leaf"></i> Grand Child</span> <a href="">Goes somewhere</a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <span><i class="icon-minus-sign"></i> Child</span> <a href="">Goes somewhere</a>
+                    <ul>
+                        <li>
+                            <span><i class="icon-leaf"></i> Grand Child</span> <a href="">Goes somewhere</a>
+                        </li>
+                        <li>
+                            <span><i class="icon-minus-sign"></i> Grand Child</span> <a href="">Goes somewhere</a>
+                            <ul>
+                                <li>
+                                    <span><i class="icon-minus-sign"></i> Great Grand Child</span> <a href="">Goes somewhere</a>
+                                    <ul>
+                                        <li>
+                                            <span><i class="icon-leaf"></i> Great great Grand Child</span> <a href="">Goes somewhere</a>
+                                        </li>
+                                        <li>
+                                            <span><i class="icon-leaf"></i> Great great Grand Child</span> <a href="">Goes somewhere</a>
+                                        </li>
+                                     </ul>
+                                </li>
+                                <li>
+                                    <span><i class="icon-leaf"></i> Great Grand Child</span> <a href="">Goes somewhere</a>
+                                </li>
+                                <li>
+                                    <span><i class="icon-leaf"></i> Great Grand Child</span> <a href="">Goes somewhere</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <span><i class="icon-leaf"></i> Grand Child</span> <a href="">Goes somewhere</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <span><i class="icon-folder-open"></i> Parent2</span> <a href="">Goes somewhere</a>
+            <ul>
+                <li>
+                    <span><i class="icon-leaf"></i> Child</span> <a href="">Goes somewhere</a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
 
-            <div id="class-search-menu">
-                <div data-options="name:'method_enter',iconCls:'icon-ok'">Method Invocation</div>
-                <div data-options="name:'source-only'">Class with source code</div>
-            </div>
-            <table id="search-result-treegrid" style="width:550px;"></table>
+<div class="tree">
+    <ul>
+        <li>
+            <span><i class="icon-calendar"></i> 2013, Week 2</span>
+            <ul>
+                <li>
+                    <span class="badge badge-success"><i class="icon-minus-sign"></i> Monday, January 7: 8.00 hours</span>
+                    <ul>
+                        <li>
+                            <a href=""><span><i class="icon-time"></i> 8.00</span> &ndash; Changed CSS to accomodate...</a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <span class="badge badge-success"><i class="icon-minus-sign"></i> Tuesday, January 8: 8.00 hours</span>
+                    <ul>
+                        <li>
+                            <span><i class="icon-time"></i> 6.00</span> &ndash; <a href="">Altered code...</a>
+                        </li>
+                        <li>
+                            <span><i class="icon-time"></i> 2.00</span> &ndash; <a href="">Simplified our approach to...</a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <span class="badge badge-warning"><i class="icon-minus-sign"></i> Wednesday, January 9: 6.00 hours</span>
+                    <ul>
+                        <li>
+                            <a href=""><span><i class="icon-time"></i> 3.00</span> &ndash; Fixed bug caused by...</a>
+                        </li>
+                        <li>
+                            <a href=""><span><i class="icon-time"></i> 3.00</span> &ndash; Comitting latest code to Git...</a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <span class="badge badge-important"><i class="icon-minus-sign"></i> Wednesday, January 9: 4.00 hours</span>
+                    <ul>
+                        <li>
+                            <a href=""><span><i class="icon-time"></i> 2.00</span> &ndash; Create component that...</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <span><i class="icon-calendar"></i> 2013, Week 3</span>
+            <ul>
+                <li>
+                    <span class="badge badge-success"><i class="icon-minus-sign"></i> Monday, January 14: 8.00 hours</span>
+                    <ul>
+                        <li>
+                            <span><i class="icon-time"></i> 7.75</span> &ndash; <a href="">Writing documentation...</a>
+                        </li>
+                        <li>
+                            <span><i class="icon-time"></i> 0.25</span> &ndash; <a href="">Reverting code back to...</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+            <table id="field-visitor-treegrid" style="width:550px;"></table>
             
         </div>
 
