@@ -3,7 +3,7 @@
 # @Author: Beinan
 # @Date:   2015-01-03 19:47:38
 # @Last Modified by:   Beinan
-# @Last Modified time: 2015-01-09 16:36:40
+# @Last Modified time: 2015-01-11 19:39:33
 
 define [
   "jquery"
@@ -15,49 +15,29 @@ define [
     
     constructor: (options) ->
       @options = options
+      @container = options.container
       #init a treegrid for query results
-      
+      @jvm_processes = options.jvm_processes 
       
      
-    pop: ()->
-      $("#reasoning-window").window("open")
+    show: ()->
       nodes = []
-      nodes_by_thread = {}
       links = []
-      for signal in @options.signals.models
-        node = signal
-        nodes.push node
-        if nodes_by_thread[signal.get("thread_id")]?
-          nodes_by_thread[signal.get("thread_id")].push node                   
-        else
-          nodes_by_thread[signal.get("thread_id")] = [node]
-
-      console.log "nodes", nodes_by_thread
-      for thread_id, nodes_of_thread of nodes_by_thread
-        nodes_of_thread.sort (a, b)->
-          a.get("invocation_id") - b.get("invocation_id")
-        for node, i in nodes_of_thread
-          if i != 0 #ignore the first node
-            links.push
-              source: nodes_of_thread[i]
-              target: nodes_of_thread[i - 1]  
-          
+      for jvm in @jvm_processes.models
+        graph = jvm.generate_signal_dependency_graph()
+        console.log graph
+        nodes.push.apply(nodes, graph.nodes) #concat nodes and graph.nodes
+        links.push.apply(links, graph.links)
       
-      # Compute the distinct nodes from the links.
-      #links.forEach (link) ->
-        #link.source = nodes[link.source] or (nodes[link.source] = name: link.source)
-        #link.target = nodes[link.target] or (nodes[link.target] = name: link.target)
-        #return
-
+      
       tick = ->
-        link.attr("x1", (d) ->
-          d.source.x
-        ).attr("y1", (d) ->
-          d.source.y
-        ).attr("x2", (d) ->
-          d.target.x
-        ).attr "y2", (d) ->
-          d.target.y
+        path.attr "d", (d) ->
+          dx = d.target.x - d.source.x
+          dy = d.target.y - d.source.y
+          dr = Math.sqrt(dx * dx + dy * dy)
+          #"M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y
+          "M" + d.target.x + "," + d.target.y + "A" + dr + "," + dr + " 0 0,1 " + d.source.x + "," + d.source.y
+
 
         node.attr "transform", (d) ->
           "translate(" + d.x + "," + d.y + ")"
@@ -74,6 +54,20 @@ define [
 
       svg = d3.select("#reasoning-graph")
       
+      svg.html("")
+      #build the arrow.
+      svg.append("svg:defs").selectAll("marker")
+        .data(["end"])      # Different link/path types can be defined here
+        .enter().append("svg:marker")    #This section adds in the arrows
+        .attr("id", String)
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 15)
+        .attr("refY", -1.5)
+        .attr("markerWidth", 8)
+        .attr("markerHeight", 8)
+        .attr("orient", "auto")
+        .append("svg:path")
+        .attr("d", "M0,-5L10,0L0,5");      
       
       mouseover = ->
         d3.select(this).select("circle").transition().duration(750).attr "r", 16
@@ -81,15 +75,24 @@ define [
       mouseout = ->
         d3.select(this).select("circle").transition().duration(750).attr "r", 8
         
-      link = svg.selectAll(".link")
+      
+      path = svg.append("svg:g")
+        .selectAll("path")
         .data(force.links())
-        .enter().append("line")
-        .attr("class", "link")
+        .enter().append("svg:path")
+        .attr("marker-end", "url(#end)")
+        .attr "class", (d) ->
+          "link " + d.type
+
       node = svg.selectAll(".node")
         .data(force.nodes())
         .enter()
         .append("g")
-        .attr("class", "node")
+        .attr "class", (d)->
+          if(d.get("field_visitor")?)
+            return "node " + d.get("field_visitor").get("msg_type")
+          else
+            return "node method" 
         .on("mouseover", mouseover)
         .on("mouseout", mouseout).call(force.drag)
       node.append("circle").attr "r", 8

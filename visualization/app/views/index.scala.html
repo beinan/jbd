@@ -3,18 +3,102 @@
 
 @main("Welcome to Java Bug Digger Visualization") {
 
-    <div class="easyui-panel" title="Java Execution Visualiztion" style="width:100%;height:500px;padding:10px;">
-        <div style="padding:5px 0;">
-            <a href="#pop_class_method_filter" class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:100px">Actor Filter</a>
-            <a href="#pop_signal_filter" class="easyui-linkbutton" data-options="iconCls:'icon-print'" style="width:100px">Signal Filter</a>
-            <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-reload'" style="width:100px">Reload</a>
-            <a href="#pop_reasoning" class="easyui-linkbutton" data-options="iconCls:'icon-help'" style="width:100px">
-                Reasoning
-            </a>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">JBD</a>
         </div>
-       
 
-        <svg id='diagram' width="1500" height="2500">
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li>
+              <a href="#show_process_filter" 
+                id="show_process_filter_btn"
+                class="btn btn-default navbar-btn active">Process Filter</a>
+            </li>
+            <li>
+              <a href="#show_field_filter" 
+                id="show_field_filter_btn" 
+                class="btn btn-default navbar-btn">Field Filter
+              </a>
+            </li>
+            <li>
+              <a href="#show_reasoning_graph" 
+                id="show_reasoning_graph_btn" 
+                class="btn btn-default navbar-btn">Reasoning Graph
+              </a>
+
+            </li>
+            
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="/">Reload</a></li>
+            
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>  
+
+    <div class="modal fade bs-example-modal-lg" role="dialog" id="classes_db_query_dialog"
+      aria-labelledby="process_fileter_label" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="process_fileter_label">Build a query for classes and methods</h4>
+          </div><!-- /.modal-header-->
+          <div class="modal-body">
+              
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <div class="panel panel-success" id="process_filter_panel">
+        <div class="panel-heading">Process(JVM Instance) Filter</div>
+        <div class="panel-body" style="max-height: 320px; overflow: scroll;">
+          <div class="tree" id="process_filter_tree">
+
+          </div> <!-- /.tree -->
+    
+
+          
+        </div><!-- /.panel-body-->
+
+    </div><!-- /#field-filter-panel -->
+    <div class="panel panel-success hidden" id="field_filter_panel">
+        <div class="panel-heading">Field Filter</div>
+        <div class="panel-body" style="max-height: 320px; overflow: scroll;">
+          
+
+          
+        </div><!-- /.panel-body-->
+
+    </div><!-- /#field-filter-panel -->
+    
+    <div class="panel panel-success hidden" id="reasoning_graph_panel">
+        <div class="panel-heading">Reasoning Graph (Signal dependency)</div>
+        <div class="panel-body" style="max-height: 320px; overflow: scroll;">
+          
+          <svg id='reasoning-graph' width="2280" height="2500">
+            
+          </svg>
+          
+        </div><!-- /.panel-body-->
+
+    </div><!-- /#field-filter-panel -->
+ 
+
+    <div class="panel panel-info">
+      <div class="panel-heading">Visualization</div>
+      
+      <div class="panel-body" style="max-height: 520px; overflow: scroll;">
+      <a class="btn btn-success" href="#draw_seq_diagram" role="button">Draw Sequence Diagram</a>
+      <a class="btn btn-warning" href="#replay" role="button">Replay</a>
+      
+        <svg id='diagram' width="2280" height="2500">
             <defs>
                 <marker id="Triangle" viewBox="0 0 10 10" refX="1" refY="5" 
                         markerUnits="strokeWidth" markerWidth="4" markerHeight="5"
@@ -22,165 +106,52 @@
                   <path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"/>
                 </marker>
             </defs>
-        </svg>
 
+        </svg>
+      </div>
+    </div>
+   
+    <nav class="navbar navbar-default navbar-fixed-bottom">
+      <div class="container">
+        <div class="navbar-left">
+          
+          <table class="table">
             
-        </svg>
-
-        <div id="reasoning-window" class="easyui-window" title="Reasoning Window" data-options="closed:true,iconCls:'icon-pencil'" style="width:300px;height:400px;">
-           <svg id='reasoning-graph' width="1500" height="1500">
+          </table>
+        </div>
+        <div class="nav navbar-nav navbar-right">
+          <li>
+            <button type="button" class="btn btn-default" aria-label="Left Align">
+              <span class="glyphicon glyphicon-backward" aria-hidden="true"></span>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="btn btn-default" aria-label="Left Align">
+              <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="btn btn-default" aria-label="Left Align">
+              <span class="glyphicon glyphicon-pause" aria-hidden="true"></span>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="btn btn-default" aria-label="Left Align">
+              <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="btn btn-default" aria-label="Left Align">
+              <span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+            </button>
+          </li>
+          
           
         </div>
+      </div>
+    </nav>
+                
+       
 
-        <div id="prop-window" class="easyui-window" title="Properties Window" data-options="closed:true,iconCls:'icon-pencil'" style="width:300px;height:400px;">
-           <table id="prop-grid" style="width:300px"></table> 
-        </div>
-
-        <div id="class-method-filter-window" class="easyui-window" title="Search Window" data-options="closed:true,iconCls:'icon-pencil'" style="width:560px;height:500px;">
-            <h4>Search classes</h4>
-            <p>Select the classes or methods you want to visualize, then click "Apply Selection".</p>
-            <div style="margin:20px 0;"></div>
-            <input class="easyui-searchbox" data-options="prompt:'Please Input Value',menu:'#class-search-menu'" style="width:300px" id="class-search-box"></input>
-            <a href="#" id="search-result-selection-apply" class="easyui-linkbutton" data-options="iconCls:'icon-reload'" style="width:120px">Apply Selection</a>
-
-            <div id="class-search-menu">
-                <div data-options="name:'method_enter',iconCls:'icon-ok'">Method Invocation</div>
-                <div data-options="name:'source-only'">Class with source code</div>
-            </div>
-            <table id="search-result-treegrid" style="width:550px;"></table>
-            
-        </div>
-
-        <div id="signal-filter-window" class="easyui-window" title="Signal Filter" data-options="closed:true,iconCls:'icon-pencil'" style="width:560px;height:500px;">
-            <h4>Signal Filter</h4>
-            <div style="margin:20px 0;"></div>
-            <div class="tree well">
-    <ul>
-        <li>
-            <span><i class="icon-folder-open"></i> Parent</span> <a href="">Goes somewhere</a>
-            <ul>
-                <li>
-                    <span><i class="icon-minus-sign"></i> Child</span> <a href="">Goes somewhere</a>
-                    <ul>
-                        <li>
-                            <span><i class="icon-leaf"></i> Grand Child</span> <a href="">Goes somewhere</a>
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <span><i class="icon-minus-sign"></i> Child</span> <a href="">Goes somewhere</a>
-                    <ul>
-                        <li>
-                            <span><i class="icon-leaf"></i> Grand Child</span> <a href="">Goes somewhere</a>
-                        </li>
-                        <li>
-                            <span><i class="icon-minus-sign"></i> Grand Child</span> <a href="">Goes somewhere</a>
-                            <ul>
-                                <li>
-                                    <span><i class="icon-minus-sign"></i> Great Grand Child</span> <a href="">Goes somewhere</a>
-                                    <ul>
-                                        <li>
-                                            <span><i class="icon-leaf"></i> Great great Grand Child</span> <a href="">Goes somewhere</a>
-                                        </li>
-                                        <li>
-                                            <span><i class="icon-leaf"></i> Great great Grand Child</span> <a href="">Goes somewhere</a>
-                                        </li>
-                                     </ul>
-                                </li>
-                                <li>
-                                    <span><i class="icon-leaf"></i> Great Grand Child</span> <a href="">Goes somewhere</a>
-                                </li>
-                                <li>
-                                    <span><i class="icon-leaf"></i> Great Grand Child</span> <a href="">Goes somewhere</a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li>
-                            <span><i class="icon-leaf"></i> Grand Child</span> <a href="">Goes somewhere</a>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </li>
-        <li>
-            <span><i class="icon-folder-open"></i> Parent2</span> <a href="">Goes somewhere</a>
-            <ul>
-                <li>
-                    <span><i class="icon-leaf"></i> Child</span> <a href="">Goes somewhere</a>
-                </li>
-            </ul>
-        </li>
-    </ul>
-</div>
-
-<div class="tree">
-    <ul>
-        <li>
-            <span><i class="icon-calendar"></i> 2013, Week 2</span>
-            <ul>
-                <li>
-                    <span class="badge badge-success"><i class="icon-minus-sign"></i> Monday, January 7: 8.00 hours</span>
-                    <ul>
-                        <li>
-                            <a href=""><span><i class="icon-time"></i> 8.00</span> &ndash; Changed CSS to accomodate...</a>
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <span class="badge badge-success"><i class="icon-minus-sign"></i> Tuesday, January 8: 8.00 hours</span>
-                    <ul>
-                        <li>
-                            <span><i class="icon-time"></i> 6.00</span> &ndash; <a href="">Altered code...</a>
-                        </li>
-                        <li>
-                            <span><i class="icon-time"></i> 2.00</span> &ndash; <a href="">Simplified our approach to...</a>
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <span class="badge badge-warning"><i class="icon-minus-sign"></i> Wednesday, January 9: 6.00 hours</span>
-                    <ul>
-                        <li>
-                            <a href=""><span><i class="icon-time"></i> 3.00</span> &ndash; Fixed bug caused by...</a>
-                        </li>
-                        <li>
-                            <a href=""><span><i class="icon-time"></i> 3.00</span> &ndash; Comitting latest code to Git...</a>
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <span class="badge badge-important"><i class="icon-minus-sign"></i> Wednesday, January 9: 4.00 hours</span>
-                    <ul>
-                        <li>
-                            <a href=""><span><i class="icon-time"></i> 2.00</span> &ndash; Create component that...</a>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </li>
-        <li>
-            <span><i class="icon-calendar"></i> 2013, Week 3</span>
-            <ul>
-                <li>
-                    <span class="badge badge-success"><i class="icon-minus-sign"></i> Monday, January 14: 8.00 hours</span>
-                    <ul>
-                        <li>
-                            <span><i class="icon-time"></i> 7.75</span> &ndash; <a href="">Writing documentation...</a>
-                        </li>
-                        <li>
-                            <span><i class="icon-time"></i> 0.25</span> &ndash; <a href="">Reverting code back to...</a>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </li>
-    </ul>
-</div>
-            <table id="field-visitor-treegrid" style="width:550px;"></table>
-            
-        </div>
-
-
-    </div>
 
 }

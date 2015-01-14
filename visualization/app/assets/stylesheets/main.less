@@ -5,13 +5,37 @@ body {
 .link {
   fill: none;
   stroke: #666;
+    
+}
+
+.thread-seq {
+  stroke-width: 2px;  
+}
+.write-after-write {
+  stroke-dasharray: 10, 5;    
   stroke-width: 1.5px;
 }
 
+.read-after-write {
+  stroke-dasharray: 2, 5;
+  stroke-width: 1.5px;  
+}
+
 .node circle {
-  fill: #ccc;
   stroke: #fff;
   stroke-width: 1.5px;
+}
+
+.field_setter circle {
+  fill: #31708f;
+}
+
+.field_getter circle {
+  fill: #BCE8F1;
+}
+
+.method circle {
+  fill: #ccc;
 }
 
 text {

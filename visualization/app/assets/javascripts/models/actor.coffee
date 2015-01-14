@@ -2,7 +2,7 @@
 # @Author: Beinan
 # @Date:   2014-12-27 17:13:48
 # @Last Modified by:   Beinan
-# @Last Modified time: 2015-01-09 16:12:02
+# @Last Modified time: 2015-01-11 22:24:53
 
 
 define [
@@ -24,9 +24,8 @@ define [
   class Actor extends Backbone.Model
     initialize: ()->
       @lifelines = new LifelineColl
-      @lifelines.on "add", (lifeline)->
-        console.log "a lifeline was added", lifeline
-    
+      @thread_dict = {}
+
     title: ()->
       title = @get("owner")
       if @get("owner_ref")?
@@ -35,10 +34,19 @@ define [
 
     add_lifeline: (data)->
       data.actor = this
-      @lifelines.add(data)
+      @thread_dict[data.thread_id] = true
+      return @lifelines.add(data)
+
+    get_thread_ids: ()->
+      thread_ids = []
+      for thread_id, value of @thread_dict
+        thread_ids.push thread_id
+      return thread_ids
 
     @lookup_lifeline:(lifeline_id)->
       Lifeline.lookup_lifeline(lifeline_id)
+
+      
 
   return Actor
 

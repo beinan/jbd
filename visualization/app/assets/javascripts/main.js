@@ -2,13 +2,13 @@
 * @Author: Beinan
 * @Date:   2014-11-09 16:17:40
 * @Last Modified by:   Beinan
-* @Last Modified time: 2014-12-25 16:58:04
+* @Last Modified time: 2015-01-09 21:07:51
 */
 
 require.config({
   paths: {
     'jquery' : 'libs/jquery-2.1.1',
-    'easyui' : 'libs/jquery.easyui.min',
+    'bootstrap' : 'libs/bootstrap',
     'underscore' : 'libs/underscore-min',
     'd3' : 'libs/d3',
     'raphael': 'libs/raphael',
@@ -16,11 +16,11 @@ require.config({
     'routes' : "routes"
   },
   shim: {
+    bootstrap: {
+      deps:["jquery"]
+    },
     d3: {
       exports: 'd3'
-    },
-    easyui: {
-      deps: ['jquery']
     },
     seq_diagram:{
       deps: ["raphael", "underscore"], 
@@ -38,7 +38,7 @@ require.config({
 });
 
 
-require(["easyui", "app_router"],
+require(["bootstrap","app_router"],
   function(ingore, AppRouter) {
   
   new AppRouter;
