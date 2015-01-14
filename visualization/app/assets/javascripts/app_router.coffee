@@ -2,7 +2,7 @@
 # @Author: Beinan
 # @Date:   2014-12-25 17:22:58
 # @Last Modified by:   Beinan
-# @Last Modified time: 2015-01-13 14:55:27
+# @Last Modified time: 2015-01-13 22:56:32
 define [
   "jquery"
   "backbone"
@@ -14,7 +14,8 @@ define [
   "data_controllers/class_method_filter_controller"
   "data_controllers/signal_filter_controller"
   "data_controllers/field_filter_controller"
-  "data_controllers/reasoning_graph_controller"  
+  "data_controllers/reasoning_graph_controller"
+  "data_controllers/replay_controller"  
 ], ($, Backbone, JVMProcessColl, ActorColl, SignalColl, 
   JVMProcessFilterController, SeqDiagramController, 
   ClassMethodFilterController, SignalFilterController, 
@@ -23,8 +24,6 @@ define [
   class AppRouter extends Backbone.Router
     initialize: ()->
       @jvm_processes = new JVMProcessColl
-      @actors = new ActorColl()
-      @signals = new SignalColl()
       
       @processFilterController = new JVMProcessFilterController
         jvm_processes : @jvm_processes
@@ -49,8 +48,6 @@ define [
         jvm_processes : @jvm_processes
         container: "#reasoning_graph_panel"
 
-
-
       Backbone.history.start()
 
 
@@ -61,6 +58,7 @@ define [
       "show_field_filter": "show_field_filter" 
       "show_reasoning_graph": "show_reasoning_graph"
       "draw_seq_diagram" : "draw_seq_diagram"
+      "replay":"replay"
 
     main: ()->
       #@seqDiagramController.start()
@@ -88,6 +86,9 @@ define [
 
     draw_seq_diagram: ()->
       @seqDiagramController.draw()
+
+    replay: ()->
+
 
   return AppRouter
 
