@@ -17,13 +17,14 @@ define [
     
     render: ()->
       jvm_items = d3.select(@el)
+        .append("div").attr("class", "tree")
         .append("ul")
         .selectAll("li").data(@collection.models)
         .enter().append("li")
       jvm_items.append("span").html (jvm_process) -> 
         '<i class="glyphicon glyphicon-zoom-in"></i>' + jvm_process.id 
       jvm_items.append("a")
-        .text(" Build a MongoDB query to start")
+        .text(" Build a MongoDB query")
         .attr("href", (jvm_process)-> "#query_classes/#{jvm_process.id}")
       
       jvm_items.append("ul")

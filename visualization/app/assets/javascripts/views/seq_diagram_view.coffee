@@ -23,6 +23,7 @@ define [
         
 
     render: (y)->
+      @model.y = y + @height()
       @signal_row.attr "transform", "translate(0,#{y})"
       sig_arrow_y = y + @height()
       update_lifeline_position = (lifeline)->
@@ -85,15 +86,23 @@ define [
           "style" : "opacity:0"
 
         .each (model) ->
-          content = $("<div></div>")
-          rows = d3.select(content[0]).append("table").attr
-            "class": "table table-striped"
-          .selectAll("tr").data(d3.entries(model.attributes)).enter().append("tr")
-          rows.append("td").text (d) -> d.key
-          rows.append("td").text (d) -> d.value
           
+          content = $("<div></div>")
+          # rows = d3.select(content[0]).append("table").attr
+          #   "class": "table table-striped"
+          # .selectAll("tr").data(d3.entries(model.attributes)).enter().append("tr")
+          # rows.append("td").text (d) -> d.key
+          # rows.append("td").text (d) -> d.value
+          model.to_lifeline().params (params)->
+            console.log "params", params
+            rows = d3.select(content[0]).append("table").attr
+              "class": "table table-striped"
+            .selectAll("tr").data(params).enter().append("tr")
+            rows.append("td").text (d) -> d
+            #rows.append("td").text (d) -> d.value
+
           $(this).popover
-            title: "hay"
+            title: "Method Invocation"
             content: content
             container: "body"
             html: true
@@ -182,9 +191,11 @@ define [
           lifeline.set("max_y", 0)
           lifeline.set("min_y", Number.MAX_VALUE)
           lifeline.on "change:min_y change:max_y", (model)->
+            height = model.get("max_y") - model.get("min_y") + 20
+            height = 0 if height < 0
             d3.select(this).attr
               y: model.get("min_y") - 10
-              height: model.get("max_y") - model.get("min_y") + 20
+              height: height
           , this    
               
       @model.set("x_center", x_center)
@@ -200,7 +211,9 @@ define [
     
     initialize: ()->
       console.log "Sequence Diagram view is initializing"
-      @svg = d3.select(@el)
+      @svg = d3.select(@el).append("svg").attr
+        width: 50000
+        height: 54000
       #@collection.on "add", @new_actor_added, @ 
       #build the arrow.
       @svg.append("svg:defs").selectAll("marker")
@@ -221,25 +234,42 @@ define [
       console.log "seqDiagramView is rendering"
       x = 80
       y = 80
-      for jvm in @collection.models
-        graph = jvm.generate_signal_dependency_graph()
-        sorted_signals = graph.top_sort()
-        console.log "sorted signals" ,sorted_signals 
-        
-        for actor in jvm.actors.models
-          actor_width = @render_actor actor, x
-          x = x + actor_width + 20
-              
-        for signal in sorted_signals
-          if !signal.get("field_visitor")?        
-            signal_height = @render_signal signal, y
-            y = y + signal_height + 10
+      jvm = @model
+      graph = jvm.generate_signal_dependency_graph()
+      jvm.sorted_signals = graph.top_sort()
+      console.log "sorted signals" ,jvm.sorted_signals 
+      
+      for actor in jvm.actors.models
+        actor_width = @render_actor actor, x
+        x = x + actor_width + 20
+            
+      for signal in jvm.sorted_signals
+        if !signal.get("field_visitor")?        
+          signal_height = @render_signal signal, y
+          y = y + signal_height + 10
 
-        for actor in jvm.actors.models
-          if actor.get("view")?
-            actor.get("view").update_center_path(y)
+      for actor in jvm.actors.models
+        if actor.get("view")?
+          actor.get("view").update_center_path(y)
+      
+      #replay progress
+      progress_line = @svg.append("line").attr
+        x1: 0
+        x2: x + 200
+        y1: 0
+        y2: 0
+        style: "stroke:rgb(255,0,0);stroke-width:2"
+      jvm.replay_process_model.on "change:pos", ()->
+        pos = jvm.replay_process_model.get("pos") 
+        y = jvm.sorted_signals[pos].y
+        if y?
+          progress_line.attr
+            y1: y
+            y2: y
 
-        
+      @svg.attr
+        width: x + 300
+        height: y   
     render_signal: (signal, y) ->
       signal_view = new SignalView
         model: signal

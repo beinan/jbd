@@ -19,57 +19,56 @@ define [
 ], ($, Backbone, JVMProcessColl, ActorColl, SignalColl, 
   JVMProcessFilterController, SeqDiagramController, 
   ClassMethodFilterController, SignalFilterController, 
-  FieldFilterController, ReasoningGraphController) ->
+  FieldFilterController, ReasoningGraphController, ReplayController) ->
 
   class AppRouter extends Backbone.Router
     initialize: ()->
       @jvm_processes = new JVMProcessColl
-      
+      @container = $('#main-container')
       @processFilterController = new JVMProcessFilterController
         jvm_processes : @jvm_processes
-        container: "#process_filter_tree"
+        container: @container
 
       #filter the data by class name and method name
       @classMethodFilterController = new ClassMethodFilterController
-        container: "#classes_db_query_dialog"
+        container: @container
 
 
-      #signal filter
-      @fieldFilterController = new FieldFilterController
-        jvm_processes : @jvm_processes
-        container: "#field_filter_panel"
+      # #signal filter
+      # @fieldFilterController = new FieldFilterController
+      #   jvm_processes : @jvm_processes
+      #   container: "#field_filter_panel"
 
       #control the seq diagram
       @seqDiagramController = new SeqDiagramController
-        jvm_processes : @jvm_processes
-        container: "#diagram"
+        #jvm_processes : @jvm_processes
+        container: @container
 
       @reasoningController = new ReasoningGraphController
-        jvm_processes : @jvm_processes
-        container: "#reasoning_graph_panel"
+        container: @container
+
+      @replayController = new ReplayController
+        container: @container
 
       Backbone.history.start()
 
 
     routes:
       "":"main"
-      "show_process_filter": "show_process_filter"
-      "query_classes/:jvm_id": "pop_class_method_filter"
+      "query_classes/:jvm_id": "show_class_method_filter"
       "show_field_filter": "show_field_filter" 
-      "show_reasoning_graph": "show_reasoning_graph"
-      "draw_seq_diagram" : "draw_seq_diagram"
-      "replay":"replay"
+      "reasoning/:jvm_id": "show_reasoning_graph"
+      "visualize/:jvm_id" : "draw_seq_diagram"
+      "replay/:jvm_id" : "replay"
 
     main: ()->
+      @processFilterController.show()
       #@seqDiagramController.start()
 
-    show_process_filter: ()->
-      $('#process_filter_panel').toggleClass("hidden")
-      $('#show_process_filter_btn').toggleClass("active")      
-      this.navigate("") #back to main window  
+    
 
-    pop_class_method_filter: (jvm_id)->
-      @classMethodFilterController.pop(@jvm_processes.get(jvm_id))        
+    show_class_method_filter: (jvm_id)->
+      @classMethodFilterController.show(@jvm_processes.get(jvm_id))        
       this.navigate("") #back to main window  
 
     show_field_filter: ()->
@@ -78,16 +77,18 @@ define [
       @fieldFilterController.show()
       this.navigate("") #back to main window  
 
-    show_reasoning_graph: ()->
-      $('#reasoning_graph_panel').toggleClass("hidden")
-      $('#show_reasoning_graph_btn').toggleClass("active")      
-      @reasoningController.show()
+    show_reasoning_graph: (jvm_id)->
+      
+      @reasoningController.show(@jvm_processes.get(jvm_id))
       this.navigate("") #back to main window  
 
-    draw_seq_diagram: ()->
-      @seqDiagramController.draw()
+    draw_seq_diagram: (jvm_id)->
+      @seqDiagramController.show(@jvm_processes.get(jvm_id))
+      this.navigate("") #back to main window  
 
-    replay: ()->
+    replay: (jvm_id)->
+      @replayController.show(@jvm_processes.get(jvm_id))
+      this.navigate("") #back to main window  
 
 
   return AppRouter

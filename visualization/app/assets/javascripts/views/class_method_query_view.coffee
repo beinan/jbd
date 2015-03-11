@@ -15,7 +15,7 @@ define [
     
     className: "tree"
     initialize: ()->
-      
+      @render_filter()
     bind_tree_events: ()->
       $(@el).find("li:has(ul)").addClass("parent_li").find(" > span").attr "title", "Collapse this branch"
       $(@el).find("li.parent_li > span").on "click", (e) ->
@@ -32,8 +32,8 @@ define [
         return #parent_li click handler end
 
       
-    render: ()->
-      class_meta_li = d3.select(@el)
+    render_filter: ()->
+      class_meta_li = d3.select(@el).append("div").attr("class", "tree")
         .append("ul")
         .selectAll("li").data(@collection.models)
         .enter().append("li")
@@ -48,8 +48,8 @@ define [
         .attr("type", "checkbox")
         .property("checked", (d) -> d.get("checked"))
         .on "click",  (d)->
-          console.log "hay", this.checked
-          d.set("checked", this.checked)
+          console.log "class checked", $(this).is(':checked')
+          d.set("checked", $(this).is(':checked'))
 
 
       #two dementional 
@@ -65,8 +65,8 @@ define [
         .attr("type", "checkbox")
         .property("checked", (d) -> d.value.checked)
         .on "click",  (d)->
-          console.log "hay method", this.checked
-          d.value.checked = this.checked
+          console.log "method checked", $(this).is(':checked')
+          d.value.checked = $(this).is(':checked')
 
       
       @bind_tree_events()

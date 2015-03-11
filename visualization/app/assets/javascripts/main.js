@@ -2,7 +2,7 @@
 * @Author: Beinan
 * @Date:   2014-11-09 16:17:40
 * @Last Modified by:   Beinan
-* @Last Modified time: 2015-01-09 21:07:51
+* @Last Modified time: 2015-01-21 09:25:47
 */
 
 require.config({
@@ -13,6 +13,7 @@ require.config({
     'd3' : 'libs/d3',
     'raphael': 'libs/raphael',
     'backbone': 'libs/backbone',
+    'jquery.timer': 'libs/jquery.timer',
     'routes' : "routes"
   },
   shim: {
@@ -30,6 +31,9 @@ require.config({
       deps: ["underscore", "jquery"],
       exports: "Backbone"
 
+    },
+    'jquery.timer':{
+      deps: ['jquery']
     },
     routes:{
       exports: "jsRoutes"

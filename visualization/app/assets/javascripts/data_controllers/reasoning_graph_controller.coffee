@@ -8,26 +8,45 @@
 define [
   "jquery"
   "d3"
+  "views/panel_view"
   "models/actor"
-], ($, d3, Actor) ->
+], ($, d3, PanelView, Actor) ->
   
   class ReasoningGraphController
     
     constructor: (options) ->
       @options = options
-      @container = options.container
-      #init a treegrid for query results
-      @jvm_processes = options.jvm_processes 
       
-     
-    show: ()->
+    show: (jvm)->
+      
+      @panel = new PanelView
+        title: "Signal Dependency Graph for " + jvm.id 
+        class_name: "success"
+      @options.container.append(@panel.el)
+
+      svg = d3.select(@panel.body[0]).append("svg").attr
+        width: 1000
+        height: 800
+      @draw_reasoning_graph(svg, jvm)
+      $(@panel.footer).append('<a href="#reasoning/' + jvm.id + 
+        '" class="btn btn-primary">Dependency Graph</a>') 
+
+      $(@panel.footer).append('<a href="#replay/' + jvm.id + 
+        '" class="btn btn-warning">Replay</a>') 
+
+      query_btn = $('<input class="btn btn-default query-button" type="button" value="Discard">')
+      $(@panel.footer).append(query_btn) 
+      controller = this
+      $(query_btn).on "click", ()->
+        controller.panel.remove()
+
+    draw_reasoning_graph: (svg, jvm)->
       nodes = []
       links = []
-      for jvm in @jvm_processes.models
-        graph = jvm.generate_signal_dependency_graph()
-        console.log graph
-        nodes.push.apply(nodes, graph.nodes) #concat nodes and graph.nodes
-        links.push.apply(links, graph.links)
+      
+      graph = jvm.generate_signal_dependency_graph()
+      nodes.push.apply(nodes, graph.nodes) #concat nodes and graph.nodes
+      links.push.apply(links, graph.links)
       
       
       tick = ->
@@ -52,9 +71,7 @@ define [
         .on("tick", tick)
         .start()
 
-      svg = d3.select("#reasoning-graph")
       
-      svg.html("")
       #build the arrow.
       svg.append("svg:defs").selectAll("marker")
         .data(["end"])      # Different link/path types can be defined here

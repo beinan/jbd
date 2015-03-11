@@ -72,5 +72,6 @@ define [
         from_lifeline.get("actor")
       else
         null
-    
+
+
   return Signal

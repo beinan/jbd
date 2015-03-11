@@ -23,6 +23,7 @@ define [
     initialize: ()->
       @actors = new ActorColl
       @signals = new SignalColl
+      @replay_process_model = new Backbone.Model
     
     load_actors: ()->
       model = this
@@ -34,7 +35,7 @@ define [
               #console.log "data filter:query result",data
               for method_entry in data                
                 model.add_actor_from_method_entry method_entry
-      
+            
     add_actor_from_method_entry: (method_entry)->
       #console.log "add method entry", method_entry
       method_desc = new MethodDesc method_entry["method_desc"]

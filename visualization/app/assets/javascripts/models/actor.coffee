@@ -7,7 +7,8 @@
 
 define [
   "backbone"
-], (Backbone) ->
+  "db/db_query"
+], (Backbone, dbQuery) ->
 
   class Lifeline extends Backbone.Model
     @lifeline_dict: {}  
@@ -17,6 +18,19 @@ define [
     
     @lookup_lifeline: (lifeline_id) ->
       @lifeline_dict[lifeline_id]
+
+    params: (callback)->
+      lifeline = this
+      dbQuery
+        invocation_id: @get("invocation_id")
+        thread_id: @get("thread_id")
+        msg_type: "method_argument"  #field_setter or field_getter
+        , (data) ->
+          param_values = []
+          for method_param in data
+            console.log "params-data", method_param
+            param_values[method_param["arg_seq"]] = method_param["value"]
+          callback param_values
 
   class LifelineColl extends Backbone.Collection
     model: Lifeline
