@@ -19,9 +19,12 @@ import scala.concurrent.Future
 // Reactive Mongo imports
 import reactivemongo.api._
 
+import play.api.Logger
+
 // Reactive Mongo plugin, including the JSON-specialized collection
 import play.modules.reactivemongo.MongoController
 import play.modules.reactivemongo.json.collection.JSONCollection
+
 
 
 object MainController extends Controller with MongoController{
@@ -89,11 +92,36 @@ object MainController extends Controller with MongoController{
       }.get
   }
 
+
+  import java.io.FileInputStream
+  import com.github.javaparser.JavaParser
+  import com.github.javaparser.ast.CompilationUnit
+  import _root_.com.jbd.visualization.ast.Ast2JsonParser
+
+  def getSourceCode() = Action{ request =>
+      request.body.asJson.map{ json =>
+        val class_name = (json \ "class_name").as[String]
+        val method_name = (json \ "method_name").as[String]
+        Logger.debug(s"Getting source code for $class_name $method_name")
+        
+        val in = new FileInputStream("/home/bwang19/jbd/tracing/src/test/java/samples/concurrent/Plant.java")
+
+        val cu = JavaParser.parse(in)
+        in.close()
+        //Logger.debug(cu.toString())
+        //val result = db.command(RawCommand(mapReduceCommand))
+        //result.map { result =>
+        Ok(Ast2JsonParser.ast2json(cu))
+        //}
+      }.get
+  }
+
   def javascriptRoutes = Action { implicit request =>
     Ok(Routes.javascriptRouter("jsRoutes")(
       routes.javascript.MainController.getMessage,
       routes.javascript.MainController.mapReduce,
-      routes.javascript.MainController.query
+      routes.javascript.MainController.query,
+      routes.javascript.MainController.getSourceCode
     )).as(JAVASCRIPT)
   }
 }

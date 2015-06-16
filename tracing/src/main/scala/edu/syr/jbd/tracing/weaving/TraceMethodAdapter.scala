@@ -153,6 +153,12 @@ class TraceMethodAdapter(api : Int, mv : MethodVisitor, owner: String,
     }
   }
 
+  override def visitLineNumber(line: Int, start: Label) {
+    super.visitLineNumber(line, start)
+    push(line)
+    mv.visitMethodInsn(Opcodes.INVOKESTATIC, "edu/syr/jbd/tracing/JBDTrace", "traceLineNumber", "(I)V")
+  }
+
 
 }
 

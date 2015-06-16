@@ -8,9 +8,10 @@ define [
   "jquery"
   "backbone"
   "views/panel_view"
+  "views/tab_view"
   "views/replay_view"  
   "jquery.timer"
-], ($, Backbone, PanelView, ReplayView, timer) ->
+], ($, Backbone, PanelView, TabView, ReplayView, timer) ->
   
   class ReplayFieldModel extends Backbone.Model
     initialize:()->
@@ -62,6 +63,7 @@ define [
       return field_models
 
     show: (jvm)->
+      
       @panel = new PanelView
         title: "Replay:" + jvm.id 
         class_name: "danger"
@@ -74,7 +76,7 @@ define [
       @replay_process_bar.set
         total: jvm.signals.length
         pos: 0
-
+      
       @view = new ReplayView
         model: @replay_process_bar
         collection: @fields

@@ -259,13 +259,30 @@ define [
         y1: 0
         y2: 0
         style: "stroke:rgb(255,0,0);stroke-width:2"
+
       jvm.replay_process_model.on "change:pos", ()->
         pos = jvm.replay_process_model.get("pos") 
-        y = jvm.sorted_signals[pos].y
-        if y?
-          progress_line.attr
-            y1: y
-            y2: y
+        
+        if jvm.sorted_signals[pos]? 
+              
+          if jvm.sorted_signals[pos].y? # it's a method invocation
+            #if it's the first method invocation
+            if not jvm.replay_process_model.get("current_method_invocation")?
+              jvm.replay_process_model.set("current_method_invocation", jvm.sorted_signals[pos])
+              jvm.replay_process_model.get("current_method_invocation").set("is_replaying", true)
+
+            #modifying the current replaying method invocation  
+            if jvm.get("current_method_invocation") != jvm.sorted_signals[pos]
+              jvm.replay_process_model.get("current_method_invocation").set("is_replaying", false)
+              jvm.replay_process_model.set("current_method_invocation", jvm.sorted_signals[pos])           
+              jvm.replay_process_model.get("current_method_invocation").set("is_replaying", true)
+          
+            #onley change replay status when the current signal is visible in the diagram
+            jvm.replay_process_model.set("status", jvm.sorted_signals[pos].title())
+            y = jvm.sorted_signals[pos].y
+            progress_line.attr
+              y1: y
+              y2: y
 
       @svg.attr
         width: x + 300

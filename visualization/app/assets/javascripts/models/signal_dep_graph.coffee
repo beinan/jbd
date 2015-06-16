@@ -56,7 +56,7 @@ define [
         if(node.get("field_visitor")?) #it is field visitor
           class_name = node.get("field_visitor").class_name
           field_name =  node.get("field_visitor").field_name  
-          if(@field_filter[class_name][field_name].checked)
+          if(true or @field_filter[class_name][field_name].checked)
             @nodes.push node
             @nodes_by_thread[node.get("thread_id")] ?= []
             @nodes_by_thread[node.get("thread_id")].push node                   
@@ -90,7 +90,7 @@ define [
               type: 'thread-seq'  
       for field_id, nodes_of_field of @nodes_by_field
         for data, version in nodes_of_field
-          if data?
+          if data? and data["getter"]?
             for getter in data["getter"]
               if(data["setter"]?)
                 @links.push

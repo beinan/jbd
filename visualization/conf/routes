@@ -6,6 +6,7 @@ GET     /                           controllers.MainController.index()
 GET     /message/:id                controllers.MainController.getMessage(id:String)
 POST    /mapreduce/:coll            controllers.MainController.mapReduce(coll:String)
 POST    /query                      controllers.MainController.query()
+POST    /sourcecode                 controllers.MainController.getSourceCode()
 
 GET     /assets/javascripts/routes.js  controllers.MainController.javascriptRoutes()
 

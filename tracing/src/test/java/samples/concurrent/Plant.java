@@ -1,3 +1,4 @@
+
 /* 
 * @Author: Beinan
 * @Date:   2014-11-22 16:35:36
@@ -77,7 +78,7 @@ class PartWorker implements Runnable{
     this.buff = buff;
   }
   public void run(){
-    for(int i = 0; i < 10; i++){
+    for(int i = 0; i < 2; i++){
       int pattern[] = Plant.WORKER_PATTERN[(int)(Math.random() * 10)];
       try{
         buff.placeRequest(pattern[0], pattern[1], pattern[2]);
@@ -95,7 +96,7 @@ class ProductWorker implements Runnable{
     this.buff = buff;
   }
   public void run(){
-    for(int i = 0; i < 10; i++){
+    for(int i = 0; i < 2; i++){
       int pattern[] = Plant.WORKER_PATTERN[(int)(Math.random() * 6 + 4)];
       try{
         buff.pickUpRequest(pattern[0], pattern[1], pattern[2]);

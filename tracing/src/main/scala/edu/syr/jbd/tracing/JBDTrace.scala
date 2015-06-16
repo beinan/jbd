@@ -108,7 +108,8 @@ object JBDTrace{
       "version" -> counter.get,
       "field" -> field,
       "owner_ref" -> System.identityHashCode(owner_ref),
-      "msg_type" -> "field_getter",      
+      "msg_type" -> "field_getter",
+      "line_number" -> local.get.line_number,
       "created_datetime" -> BSONDateTime(System.currentTimeMillis))
     
     MongoDB.coll("trace").insert(doc)   
@@ -127,11 +128,15 @@ object JBDTrace{
       "field" -> field,
       "owner_ref" -> System.identityHashCode(owner_ref),
       "msg_type" -> "field_setter",      
+      "line_number" -> local.get.line_number,
       "created_datetime" -> BSONDateTime(System.currentTimeMillis))
     
     MongoDB.coll("trace").insert(doc)   
   }
 
+  def traceLineNumber(line_number: Int) = {
+    local.get.line_number = line_number
+  }
   def trace(v: AnyRef):Unit = {
     //println("aaaabbbb" + v)
   }
@@ -143,11 +148,16 @@ class JBDLocal extends ThreadLocal[JBDLocalValue]{
 
 class JBDLocalValue{
   var counter:Long = 0
+  var line_number:Int = 0
   def count = {
     counter = counter + 1
     counter
   }
   def get = counter
+  def change_line_number(line:Int) = {
+    line_number = line
+  }
+
 }
 
 object JBDLocalValue{
