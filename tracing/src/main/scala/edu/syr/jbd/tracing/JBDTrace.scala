@@ -16,7 +16,9 @@ object JBDTrace{
   val local = new JBDLocal
   val jvm_name = sys.env.getOrElse("jvm_id", ManagementFactory.getRuntimeMXBean().getName());
   
-  import scala.concurrent.ExecutionContext.Implicits.global
+  import java.util.concurrent.Executors
+  import scala.concurrent.ExecutionContext
+  implicit val ec = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(5))
 
   def traceStaticMethodEnter(method_desc:String):Long = {
     val invocation_id = local.get.count

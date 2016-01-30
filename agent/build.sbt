@@ -1,5 +1,3 @@
-import AssemblyKeys._ 
-
 name := "jbd-agent"
 
 version := "1.0"
@@ -12,5 +10,8 @@ packageOptions +=
 
 jarName in assembly := "jbd-agent.jar"
 
-assemblySettings
 
+
+assemblyShadeRules in assembly := Seq(
+      ShadeRule.rename("org.objectweb.**" -> "shadeio.@1").inAll
+)
