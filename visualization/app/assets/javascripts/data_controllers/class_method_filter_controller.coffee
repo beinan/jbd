@@ -23,20 +23,20 @@ define [
       @panel.show("fast")   
       controller = this
       $(@panel.body).html("")
-      jvm_process.get_class_meta (meta)->
+      jvm_process.get_class_meta().done (meta)->
         view = new ClassMethodQueryView
           model: jvm_process
           collection: meta
           el: controller.panel.body
 
-      query_btn = $('<input class="btn btn-default query-button" type="button" value="Query">')
+      query_btn = $('<input class="btn btn-danger query-button" type="button" value="Visualize">')
       $(@panel.footer).append(query_btn) 
       $(query_btn).on "click", ()->
-        jvm_process.load_actors()  #query all the actors
-        
-      
-      $(@panel.footer).append('<a href="#visualize/' + jvm_process.id + '" class="btn btn-danger">Visualize
-              </a>')  
+        jvm_process.load_actors().done ()-> 
+          #alert("data loaded")
+          window.location.hash = 'visualize/' + jvm_process.id
+      #$(@panel.footer).append('<a href="#visualize/' + jvm_process.id + '" class="btn btn-danger">Visualize
+      #        </a>')  
                       
             
   return ClassMethodFilterController

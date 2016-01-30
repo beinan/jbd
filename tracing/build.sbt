@@ -2,6 +2,8 @@ name := "jbd-tracing"
 
 version := "1.0"
 
+scalaVersion := "2.10.5"
+
 resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
 
 resolvers += "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"

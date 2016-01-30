@@ -2,6 +2,9 @@ name := "jbd"
 
 version := "1.0"
 
+scalaVersion := "2.10.5"
+
+
 packAutoSettings
 
 lazy val root = project.in(file(".")).aggregate(agent, examples)

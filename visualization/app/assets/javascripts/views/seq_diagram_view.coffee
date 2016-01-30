@@ -238,15 +238,17 @@ define [
       graph = jvm.generate_signal_dependency_graph()
       jvm.sorted_signals = graph.top_sort()
       console.log "sorted signals" ,jvm.sorted_signals 
+
+      #only show the signals which are not field visitors
+      jvm.visible_signals = (s for s in jvm.sorted_signals when !s.get("field_visitor") )
       
       for actor in jvm.actors.models
         actor_width = @render_actor actor, x
         x = x + actor_width + 20
             
-      for signal in jvm.sorted_signals
-        if !signal.get("field_visitor")?        
-          signal_height = @render_signal signal, y
-          y = y + signal_height + 10
+      for signal in jvm.visible_signals                
+        signal_height = @render_signal signal, y
+        y = y + signal_height + 10
 
       for actor in jvm.actors.models
         if actor.get("view")?

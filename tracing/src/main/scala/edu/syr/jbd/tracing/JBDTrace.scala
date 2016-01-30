@@ -14,7 +14,7 @@ import edu.syr.jbd.tracing.mongo.MongoDB
 
 object JBDTrace{
   val local = new JBDLocal
-  val jvm_name = ManagementFactory.getRuntimeMXBean().getName()
+  val jvm_name = sys.env.getOrElse("jvm_id", ManagementFactory.getRuntimeMXBean().getName());
   
   import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -25,7 +25,8 @@ object JBDTrace{
       "thread_id" -> Thread.currentThread().getId(),
       "invocation_id" -> invocation_id,
       "method_desc" -> method_desc,
-      "msg_type" -> "method_enter",
+      "msg_type" -> "method_enter",     
+      "line_number" -> local.get.line_number,
       "created_datetime" -> BSONDateTime(System.currentTimeMillis))
     
     MongoDB.coll("trace").insert(doc)   
@@ -41,6 +42,7 @@ object JBDTrace{
       "method_desc" -> method_desc,
       "msg_type" -> "method_enter",
       "owner_ref" -> System.identityHashCode(owner_ref),
+      "line_number" -> local.get.line_number,
       "created_datetime" -> BSONDateTime(System.currentTimeMillis))
     
     MongoDB.coll("trace").insert(doc)   
@@ -73,6 +75,7 @@ object JBDTrace{
       "parent_invocation_id" -> parent_invocation_id,
       "method_desc" -> method_desc,
       "msg_type" -> "method_invoke",
+      "line_number" -> local.get.line_number,
       "created_datetime" -> BSONDateTime(System.currentTimeMillis))
     
     MongoDB.coll("trace").insert(doc)   

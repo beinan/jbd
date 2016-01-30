@@ -115,7 +115,7 @@ define [
               
             is_name_matched = field_name is expr.target.field_name
             return is_setter and is_pos_matched and is_name_matched
-              
+          #get the first matched field             
           matched_item = acc_item for acc_item in view.current_field_acc when is_match(acc_item) 
           if !matched_item?
             selection.append("span").attr("class", "code_warning").text "Not Reached"

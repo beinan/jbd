@@ -48,7 +48,7 @@ define [
         .attr("type", "checkbox")
         .property("checked", (d) -> d.get("checked"))
         .on "click",  (d)->
-          console.log "class checked", $(this).is(':checked')
+          #console.log "class checked", $(this).is(':checked')
           d.set("checked", $(this).is(':checked'))
 
 
@@ -65,7 +65,7 @@ define [
         .attr("type", "checkbox")
         .property("checked", (d) -> d.value.checked)
         .on "click",  (d)->
-          console.log "method checked", $(this).is(':checked')
+          #console.log "method checked", $(this).is(':checked')
           d.value.checked = $(this).is(':checked')
 
       

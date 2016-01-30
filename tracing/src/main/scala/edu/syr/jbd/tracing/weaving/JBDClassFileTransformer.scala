@@ -21,6 +21,13 @@ class JBDClassFileTransformer extends ClassFileTransformer{
     //if(className != "HelloWorld")
     if(loader == null || className.startsWith("edu/syr/jbd") 
       || className.startsWith("com/sun/")
+      || className.startsWith("sun")
+      || className.startsWith("scala")      
+      || className.startsWith("reactivemongo")
+      || className.startsWith("org/apache/logging")
+      || className.startsWith("com/typesafe/config/")
+      || className.startsWith("akka")
+      || className.startsWith("org/jboss")
       || className.startsWith("sun/"))  //to avoid system classes and jbd classes  
       return classFileBuffer
     println("ClassLoader:" + loader)
