@@ -27,7 +27,10 @@ class MethodInvocationTrackerClassAdapter(cv: ClassVisitor) extends ClassVisitor
   override def visitMethod(access: Int, name: String, desc: String, signature: String, exceptions: Array[String]): MethodVisitor = {
     println("method-visited:" + name)
     val mv: MethodVisitor = cv.visitMethod(access, name, desc, signature, exceptions)
-    return if (mv == null) null else new TraceMethodAdapter(api, mv, owner, access, name, desc)
+    return if (mv == null || name.equals("<clinit>")){ 
+      println("skip method"+name)
+      mv
+    }else new TraceMethodAdapter(api, mv, owner, access, name, desc)
   }
 }
 
@@ -91,6 +94,7 @@ class TraceMethodAdapter(api : Int, mv : MethodVisitor, owner: String,
 
   }
 
+ 
   /**
    * Tracing the return value of a method invocation
    *
@@ -107,28 +111,34 @@ class TraceMethodAdapter(api : Int, mv : MethodVisitor, owner: String,
       mv.visitMethodInsn(Opcodes.INVOKESTATIC, "edu/syr/jbd/tracing/JBDTrace", 
         "traceMethodInvocation", "(Ljava/lang/String;J)J")
       mv.visitVarInsn(Opcodes.LSTORE, local_var_tmp_invoc_id) //store to local var for tracing this method return
-    }
     
-    super.visitMethodInsn(opcode, owner, name, desc, itf)
     
-    val returnType = Type.getReturnType(desc)
-    if (returnType != Type.VOID_TYPE) {
-      if (returnType.getSize() == 2) {
-        dup2()
-      }else{
-        dup()
-      }
+      super.visitMethodInsn(opcode, owner, name, desc, itf)
+      
+      val returnType = Type.getReturnType(desc)
+      if (returnType != Type.VOID_TYPE) {
+        if (returnType.getSize() == 2) {
+          dup2()
+        }else{
+          dup()
+        }
 
-      if(returnType.getSort() <= 8){ //primitive type, do boxing
-        box(returnType)
+        if(returnType.getSort() <= 8){ //primitive type, do boxing
+          box(returnType)
+        }
+      }else{
+        push("__void__");
       }
-      push(invokee_method_key) 
+      push(invokee_method_key)
       //load invocation_id of the invoker (actuall it's the parent of this returned method invocation)
       mv.visitVarInsn(Opcodes.LLOAD, local_var_invoc_id)
       //load invocation_id of the invokee
       mv.visitVarInsn(Opcodes.LLOAD, local_var_tmp_invoc_id)
-      mv.visitMethodInsn(Opcodes.INVOKESTATIC, "edu/syr/jbd/tracing/JBDTrace", 
+      mv.visitMethodInsn(Opcodes.INVOKESTATIC, "edu/syr/jbd/tracing/JBDTrace",
         "traceReturnValue", "(Ljava/lang/Object;Ljava/lang/String;JJ)V")
+    } else {
+      super.visitMethodInsn(opcode, owner, name, desc, itf)
+    
     }
   }
   
@@ -159,6 +169,21 @@ class TraceMethodAdapter(api : Int, mv : MethodVisitor, owner: String,
     mv.visitMethodInsn(Opcodes.INVOKESTATIC, "edu/syr/jbd/tracing/JBDTrace", "traceLineNumber", "(I)V")
   }
 
+  //tracking array visiting
+  override def visitInsn(opcode:Int) {
+    if(opcode == Opcodes.IALOAD){
+      mv.visitVarInsn(Opcodes.LLOAD, local_var_invoc_id)     //parent invocation id
+      mv.visitMethodInsn(Opcodes.INVOKESTATIC, "edu/syr/jbd/tracing/JBDTrace", "traceArrayRead", "([IIJ)I")
+    }else if(opcode == Opcodes.IASTORE){
+
+      mv.visitVarInsn(Opcodes.LLOAD, local_var_invoc_id) //parent invocation id     
+      mv.visitMethodInsn(Opcodes.INVOKESTATIC, "edu/syr/jbd/tracing/JBDTrace", "traceArrayWrite", "([IIIJ)V")
+    }else{
+      super.visitInsn(opcode)
+    }
+
+  
+  }
 
 }
 

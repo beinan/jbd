@@ -9,6 +9,8 @@ package samples;
 public class QuickSort {
     public static void main(String[] args) {
       int[] a = { 4, 3, 7, 11, 2, 6, 5 };
+      int[] b = new int[5000];
+      b[4000] = 6;
       quick_sort(a, 0, 6);
       for(int v : a){
         System.out.print(v);

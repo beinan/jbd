@@ -29,10 +29,12 @@ class SynchronizedFieldTrackerClassAdapter(cv: ClassVisitor) extends ClassVisito
     println("method-visited:" + name)
     val mv: MethodVisitor = cv.visitMethod(access, name, desc, signature, exceptions)
     
-    if (mv!=null) 
+    if (mv!=null && !name.equals("<clinit>")) 
       return new FieldTrackingMethodAdapter(api, mv, owner, access, name, desc, locks)
-    else
+    else{
+      println("skip method"+name)
       return mv
+    }
   }
 
   /**
@@ -40,7 +42,7 @@ class SynchronizedFieldTrackerClassAdapter(cv: ClassVisitor) extends ClassVisito
    */
   override def visitField(access:Int, name:String, desc:String,
             signature:String, value:Object):FieldVisitor = {
-    if((access & Opcodes.ACC_STATIC) == 0){ //only for non-static field so far.
+    if((access & Opcodes.ACC_STATIC) == 0 && !owner.startsWith("java")){ //only for non-static field so far.
 
       //create lock field    
       cv.visitField(access, lock_field_name(name), lock_desc, null, null);

@@ -30,7 +30,7 @@ class WeavingTest extends Specification{
 object Executor{
   def exec = {
     val loader = new ControlledClassLoader(Executor.getClass.getClassLoader)
-    val clazz: Class[_] = loader.loadClass("samples.concurrent.Plant")
+    val clazz: Class[_] = loader.loadClass("samples.QuickSort")
     val method: Method = clazz.getMethod("main", classOf[Array[String]])
     val params: Array[String] = null
     val startExecTime: Long = System.currentTimeMillis

@@ -11,14 +11,14 @@ import java.lang.management._
 import reactivemongo.bson._
     
 import edu.syr.jbd.tracing.mongo.MongoDB
+import edu.syr.jbd.tracing.mongo.JBDExecContext
+
 
 object JBDTrace{
   val local = new JBDLocal
   val jvm_name = sys.env.getOrElse("jvm_id", ManagementFactory.getRuntimeMXBean().getName());
-  
-  import java.util.concurrent.Executors
-  import scala.concurrent.ExecutionContext
-  implicit val ec = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(5))
+
+  implicit val ec = JBDExecContext.ec
 
   def traceStaticMethodEnter(method_desc:String):Long = {
     val invocation_id = local.get.count
@@ -30,9 +30,12 @@ object JBDTrace{
       "msg_type" -> "method_enter",     
       "line_number" -> local.get.line_number,
       "created_datetime" -> BSONDateTime(System.currentTimeMillis))
-    
-    MongoDB.coll("trace").insert(doc)   
-    return invocation_id 
+    try{
+      MongoDB.coll("trace").insert(doc)
+    }catch{
+      case _ =>  //do nothing, work around for Random confict problem
+    }
+    return invocation_id
   }
   
   def traceNonStaticMethodEnter(method_desc:String, owner_ref:Object):Long = {
@@ -48,7 +51,7 @@ object JBDTrace{
       "created_datetime" -> BSONDateTime(System.currentTimeMillis))
     
     MongoDB.coll("trace").insert(doc)   
-
+   
     return invocation_id 
   }
 
@@ -98,7 +101,6 @@ object JBDTrace{
       "created_datetime" -> BSONDateTime(System.currentTimeMillis))
     
     MongoDB.coll("trace").insert(doc)   
-
   }
 
   def traceFieldGetter(counter:JBDLocalValue, value: AnyRef, 
@@ -142,6 +144,61 @@ object JBDTrace{
   def traceLineNumber(line_number: Int) = {
     local.get.line_number = line_number
   }
+
+  val array_counter = scala.collection.mutable.Map[AnyRef, Int]()
+  
+  def traceArrayRead(a:Array[Int], index:Int, parent_inv_id:Long):Int = {
+    println("array read:"+index)
+    val invocation_id = local.get.count
+     
+    a.synchronized{
+      val value = a(index)
+      val version = array_counter.getOrElse(a, 0)
+      val doc = BSONDocument(
+        "jvm_name" -> jvm_name,
+        "thread_id" -> Thread.currentThread().getId(),
+        "value" -> String.valueOf(value),
+        "invocation_id" -> invocation_id,
+        "parent_invocation_id" -> parent_inv_id,
+        "version" -> version,
+        "owner_ref" -> System.identityHashCode(a),
+        "index" -> index,
+        "msg_type" -> "array_getter",
+        "line_number" -> local.get.line_number,
+        "created_datetime" -> BSONDateTime(System.currentTimeMillis))
+
+      MongoDB.coll("trace").insert(doc)
+      return a(index)
+    }
+  }
+
+  def traceArrayWrite(a:Array[Int], index:Int, value:Int, parent_inv_id:Long) {
+    println("array write:"+index +" value:"+value)
+    val invocation_id = local.get.count
+   
+    a.synchronized{
+      a(index) = value
+      val version = array_counter.getOrElse(a, 0)
+      array_counter(a) = version + 1
+      array_counter
+      val doc = BSONDocument(
+        "jvm_name" -> jvm_name,
+        "thread_id" -> Thread.currentThread().getId(),
+        "value" -> String.valueOf(value),
+        "invocation_id" -> invocation_id,
+        "parent_invocation_id" -> parent_inv_id,
+        "version" -> String.valueOf(version + 1),
+        "owner_ref" -> System.identityHashCode(a),
+        "index" -> index,
+        "msg_type" -> "array_setter",
+        "line_number" -> local.get.line_number,
+        "created_datetime" -> BSONDateTime(System.currentTimeMillis))
+
+      MongoDB.coll("trace").insert(doc)
+    }
+    
+  }
+
   def trace(v: AnyRef):Unit = {
     //println("aaaabbbb" + v)
   }
